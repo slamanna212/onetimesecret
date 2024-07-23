@@ -74,7 +74,7 @@ OT.boot!
 @medium_password = 'Troub4dor3'
 @strong_password = 'correct horse battery staple'
 @very_long_password = 'This is a very long password with numbers 12345 and symbols !@#$%'
-
+@extreme_lengths = 'gf$dMQUE$rxGVM?Pax6hB7IpAPZDGIwdvGnQrwxNyG4I((9Icnp8*WkbKhxY5p!rZm7MjsdV5Vq(YhZyP8AS(zuQhr!AKZE7L9qAL$XCHayALKOcs9YZgqhg'
 
 ## Basic password strength check
 result = Zxcvbn.test(@weak_password)
@@ -87,6 +87,10 @@ Zxcvbn.test(@medium_password).score
 
 ## Score for a strong password
 Zxcvbn.test(@strong_password).score
+#=> 4
+
+### Score for an extreme password
+Zxcvbn.test(@extreme_lengths).score
 #=> 4
 
 ## Feedback for a weak password
