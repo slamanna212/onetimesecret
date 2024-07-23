@@ -2,7 +2,7 @@
 # typed: false
 
 #
-# Recommended: Ruby 3.2
+# Recommended: Ruby 3.2+
 #
 # status: normal maintenance
 # release date: 2022-12-25
@@ -19,6 +19,7 @@ ruby '>= 2.7.8'
 source 'https://rubygems.org/'
 
 gem 'truemail'
+gem 'zxcvbn'
 
 gem 'addressable'
 
