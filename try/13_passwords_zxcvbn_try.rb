@@ -14,6 +14,17 @@
 # time (across code changes, ours and theirs). These tryouts give us an idea
 # about the performance as well.
 #
+#
+# About Zxcvbn:
+#
+# Dropbox's zxcvbn is a password strength estimator designed to
+# evaluate the strength of passwords without actually checking them
+# against a traditional complexity requirements list. Instead, it uses
+# pattern matching and conservative entropy calculations to estimate
+# the number of guesses an attacker would need to guess the password.
+#
+#   Interactive Demo: https://lowe.github.io/tryzxcvbn/
+#
 
 require_relative '../lib/onetime'
 require 'zxcvbn'
