@@ -1,13 +1,82 @@
 # frozen_string_literal: true
 
-# These tryouts test the functionality of the Zxcvbn password strength checker.
-# Zxcvbn is used in the Onetime application to assess the strength of user passwords.
+#
+# These tryouts test the functionality of the Zxcvbn password strength
+# checker. Zxcvbn is used in the Onetime application to assess the
+# strength of user passwords.
 #
 # We're testing various aspects of Zxcvbn, including:
-# 1. Basic password strength assessment
-# 2. Analysis of different password components
-# 3. Crack time estimations
-# 4. Feedback and suggestions for weak passwords
+# 1. Basic password strength assessment for weak, medium, and strong
+#    passwords
+# 2. Analysis of different password components and patterns
+# 3. Crack time estimations for various attack scenarios
+# 4. Feedback and suggestions for different password strengths
+# 5. Comparison of scores and guesses between password categories
+# 6. Consistency of results across password strengths
+# 7. Performance checks, including calculation times
+#
+# These tests aim to ensure that the password strength checking is
+# configured and works correctly across a range of password types. We
+# also want to make sure results are consistent over time (across code
+# changes, ours and theirs). These tryouts give us an idea about the
+# relative strength of different passwords and the performance of the
+# Zxcvbn library when integrated into our application.
+#
+# By testing weak, medium, and strong passwords, we can verify that
+# Zxcvbn accurately differentiates between password strengths and
+# provides appropriate feedback for each category. This comprehensive
+# approach helps ensure the security and usability of our password
+# strength checking feature.
+#
+#
+# Usage:
+#
+#  require 'zxcvbn'
+#
+#  Zxcvbn.zxcvbn("password")
+#  {
+#    "password" => "password",
+#    "guesses" => 3,
+#    "guesses_log10" => 0.47712125471966244,
+#    "sequence" => [
+#      {
+#        "pattern" => "dictionary",
+#        "i" => 0,
+#        "j" => 7,
+#        "token" => "password",
+#        "matched_word" => "password",
+#        "rank" => 2,
+#        "dictionary_name" => "passwords",
+#        "reversed" => false,
+#        "l33t" => false,
+#        "base_guesses" => 2,
+#        "uppercase_variations" => 1,
+#        "l33t_variations" => 1,
+#        "guesses" => 2,
+#        "guesses_log10" => 0.3010299956639812
+#      }
+#    ],
+#    "calc_time" => 1,
+#    "crack_times_seconds" => {
+#      "online_throttling_100_per_hour" => 108.0,
+#      "online_no_throttling_10_per_second" => 0.3,
+#      "offline_slow_hashing_1e4_per_second" => 0.0003,
+#      "offline_fast_hashing_1e10_per_second" => 3.0e-10},
+#    "crack_times_display" => {
+#      "online_throttling_100_per_hour" => "2 minutes",
+#      "online_no_throttling_10_per_second" => "less than a second",
+#      "offline_slow_hashing_1e4_per_second" => "less than a second",
+#      "offline_fast_hashing_1e10_per_second" => "less than a second"
+#    },
+#    "score" => 0,
+#    "feedback" => {
+#      "warning" => "This is a top-10 common password",
+#      "suggestions" => [
+#        "Add another word or two. Uncommon words are better."
+#      ]
+#    }
+#  }
+#
 
 require_relative '../lib/onetime'
 require 'zxcvbn'

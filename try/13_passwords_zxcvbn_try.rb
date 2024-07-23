@@ -9,57 +9,10 @@
 # 3. Feedback and suggestions for weak passwords
 # 4. Performance with longer passwords
 #
-# These tests aim to ensure that the password strength checking works correctly,
-# which is crucial for maintaining security in the Onetime application.
-#
-#
-# Usage:
-#
-#  require 'zxcvbn'
-#
-#  Zxcvbn.zxcvbn("password")
-#  {
-#    "password" => "password",
-#    "guesses" => 3,
-#    "guesses_log10" => 0.47712125471966244,
-#    "sequence" => [
-#      {
-#        "pattern" => "dictionary",
-#        "i" => 0,
-#        "j" => 7,
-#        "token" => "password",
-#        "matched_word" => "password",
-#        "rank" => 2,
-#        "dictionary_name" => "passwords",
-#        "reversed" => false,
-#        "l33t" => false,
-#        "base_guesses" => 2,
-#        "uppercase_variations" => 1,
-#        "l33t_variations" => 1,
-#        "guesses" => 2,
-#        "guesses_log10" => 0.3010299956639812
-#      }
-#    ],
-#    "calc_time" => 1,
-#    "crack_times_seconds" => {
-#      "online_throttling_100_per_hour" => 108.0,
-#      "online_no_throttling_10_per_second" => 0.3,
-#      "offline_slow_hashing_1e4_per_second" => 0.0003,
-#      "offline_fast_hashing_1e10_per_second" => 3.0e-10},
-#    "crack_times_display" => {
-#      "online_throttling_100_per_hour" => "2 minutes",
-#      "online_no_throttling_10_per_second" => "less than a second",
-#      "offline_slow_hashing_1e4_per_second" => "less than a second",
-#      "offline_fast_hashing_1e10_per_second" => "less than a second"
-#    },
-#    "score" => 0,
-#    "feedback" => {
-#      "warning" => "This is a top-10 common password",
-#      "suggestions" => [
-#        "Add another word or two. Uncommon words are better."
-#      ]
-#    }
-#  }
+# These tests aim to ensure that the password strength checking is configured
+# and works correctly. We also want to make sure results are consistent over
+# time (across code changes, ours and theirs). These tryouts give us an idea
+# about the performance as well.
 #
 
 require_relative '../lib/onetime'
