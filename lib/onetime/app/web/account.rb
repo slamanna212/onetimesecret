@@ -14,7 +14,7 @@ module Onetime
       publically do # rubocop:disable Metrics/BlockLength
         if !sess.authenticated? && req.post?
           sess.set_error_message "You'll need to sign in before agreeing."
-          res.redirect '/login'
+          res.redirect '/signin'
         end
         if sess.authenticated? && req.post?
           if cust.contributor?
@@ -65,7 +65,7 @@ module Onetime
           logic = OT::Logic::ResetPassword.new sess, cust, req.params, locale
           logic.raise_concerns
           logic.process
-          res.redirect '/login'
+          res.redirect '/signin'
         else
           logic = OT::Logic::ResetPasswordRequest.new sess, cust, req.params, locale
           logic.raise_concerns
@@ -81,6 +81,10 @@ module Onetime
 
     def signup
       publically do
+        unless _auth_settings[:enabled] && _auth_settings[:signup]
+          return disabled_response(req.path)
+        end
+
         # If a plan has been selected, the next onboarding step is the actual signup
         if OT::Plan.plan?(req.params[:planid])
           sess.set_error_message "You're already signed up" if sess.authenticated?
@@ -104,31 +108,49 @@ module Onetime
     end
 
     def create_account
-      publically() do
+      publically do
+        unless _auth_settings[:enabled] && _auth_settings[:signup]
+          return disabled_response(req.path)
+        end
         deny_agents!
         logic = OT::Logic::CreateAccount.new sess, cust, req.params, locale
         logic.raise_concerns
         logic.process
-        #sess, cust = logic.sess, logic.cust
+        if logic.autoverify
+          sess = logic.sess
+          cust = logic.cust
+        end
         res.redirect '/'
       end
     end
 
     def login
       publically do
-        view = Onetime::App::Views::Login.new req, sess, cust, locale
+        res.redirect '/signin'
+      end
+    end
+
+    def signin
+      publically do
+        unless _auth_settings[:enabled] && _auth_settings[:signin]
+          return disabled_response(req.path)
+        end
+        view = Onetime::App::Views::Signin.new req, sess, cust, locale
         res.body = view.render
       end
     end
 
     def authenticate # rubocop:disable Metrics/AbcSize
       publically do
+        unless _auth_settings[:enabled] && _auth_settings[:signin]
+          return disabled_response(req.path)
+        end
         # If the request is halted, say for example rate limited, we don't want to
         # allow the browser to refresh and re-submit the form with the login
         # credentials.
         no_cache!
         logic = OT::Logic::AuthenticateSession.new sess, cust, req.params, locale
-        view = Onetime::App::Views::Login.new req, sess, cust, locale
+        view = Onetime::App::Views::Signin.new req, sess, cust, locale
         if sess.authenticated?
           sess.set_info_message "You are already logged in."
           res.redirect '/'
@@ -172,23 +194,6 @@ module Onetime
       end
     end
 
-    def update_account
-      authenticated('/account') do
-        logic = OT::Logic::UpdateAccount.new sess, cust, req.params, locale
-        logic.raise_concerns
-        logic.process
-        res.redirect app_path('/account')
-      end
-    end
-
-    def destroy_account
-      authenticated('/account') do
-        logic = OT::Logic::DestroyAccount.new sess, cust, req.params, locale
-        logic.raise_concerns
-        logic.process
-        res.redirect app_path('/account')
-      end
-    end
     def update_subdomain
       authenticated('/account') do
         logic = OT::Logic::UpdateSubdomain.new sess, cust, req.params, locale
@@ -198,13 +203,9 @@ module Onetime
       end
     end
 
-    def generate_apikey
-      authenticated do
-        logic = OT::Logic::GenerateAPIkey.new sess, cust, req.params, locale
-        logic.raise_concerns
-        logic.process
-        res.redirect app_path('/account')
-      end
+    private
+    def _auth_settings
+      OT.conf.dig(:site, :authentication)
     end
 
   end

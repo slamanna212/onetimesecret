@@ -11,6 +11,7 @@ class Onetime::App
     attr_reader :req, :res
     attr_reader :sess, :cust, :locale
     attr_reader :ignoreshrimp
+
     def initialize req, res
       @req, @res = req, res
     end
@@ -36,16 +37,11 @@ class Onetime::App
 
       res.header['Content-Type'] ||= content_type
 
-
       return_value = yield
 
-
       unless cust.anonymous?
-
         reqstr = stringify_request_details(req)
-
         custref = cust.obscure_email
-
         OT.info "[carefully] #{sess.short_identifier} #{custref} at #{reqstr}"
       end
 
@@ -92,13 +88,15 @@ class Onetime::App
       error_response "We'll be back shortly!"
 
     rescue StandardError => ex
-      OT.le "#{ex.class}: #{ex.message} -- #{req.current_absolute_uri} -- #{req.client_ipaddress} #{cust.custid} #{sess.short_identifier} #{locale} #{content_type} #{redirect} "
+      custid = cust&.custid || '<notset>'
+      sessid = sess&.short_identifier || '<notset>'
+      OT.le "#{ex.class}: #{ex.message} -- #{req.current_absolute_uri} -- #{req.client_ipaddress} #{custid} #{sessid} #{locale} #{content_type} #{redirect} "
       OT.le ex.backtrace.join("\n")
 
       error_response "An unexpected error occurred :["
 
     ensure
-      @sess ||= OT::Session.new :failover
+      @sess ||= OT::Session.new :failover, :anon
       @cust ||= OT::Customer.anonymous
     end
 
@@ -126,7 +124,8 @@ class Onetime::App
       return if @check_shrimp_ran
       @check_shrimp_ran = true
       return unless req.post? || req.put? || req.delete?
-      attempted_shrimp = req.params[:shrimp]
+      attempted_shrimp = req.params[:shrimp].to_s
+
       shrimp = (sess.shrimp || '[noshrimp]').clone
 
       if sess.shrimp?(attempted_shrimp) || ignoreshrimp
@@ -253,8 +252,10 @@ class Onetime::App
     end
 
     def secure?
-      # X-Scheme is set by nginx
-      # X-FORWARDED-PROTO is set by elastic load balancer
+      # It's crucial to only accept header values set by known, trusted
+      # sources. See Caddy config docs re: trusted_proxies.
+      # X-Scheme is set by e.g. nginx, caddy etc
+      # X-FORWARDED-PROTO is set by load balancer e.g. ELB
       (req.env['HTTP_X_FORWARDED_PROTO'] == 'https' || req.env['HTTP_X_SCHEME'] == "https")
     end
 

@@ -13,7 +13,7 @@ module Onetime
 
       YAML.load(ERB.new(File.read(path)).result)
     rescue StandardError => e
-      OT.err e.message
+      OT.ld e.message
       msg = if path =~ /locale/
               "Error loading locale: #{path} (#{e.message})"
             else
@@ -27,12 +27,29 @@ module Onetime
     def after_load(conf = nil)
       conf ||= {}
 
-      unless conf.has_key?(:mail)
-        raise OT::Problem, "No :mail config found in #{path}"
+      unless conf.key?(:development)
+        raise OT::Problem, "No `development` config found in #{path}"
+      end
+
+      unless conf.key?(:mail)
+        raise OT::Problem, "No `mail` config found in #{path}"
+      end
+
+      unless conf[:site]&.key?(:authentication)
+        raise OT::Problem, "No `site.authentication` config found in #{path}"
+      end
+
+      # Disable all authentication sub-features when main feature is off for
+      # consistency, security, and to prevent unexpected behavior. Ensures clean
+      # config state.
+      if OT.conf.dig(:site, :authentication, :enabled) != true
+        OT.conf[:site][:authentication].each_key do |key|
+          conf[:site][:authentication][key] = false
+        end
       end
 
       mtc = conf[:mail][:truemail]
-      OT.info "Setting TrueMail config from #{path}"
+      OT.ld "Setting TrueMail config from #{path}"
       raise OT::Problem, "No TrueMail config found" unless mtc
 
       # Iterate over the keys in the mail/truemail config
@@ -47,6 +64,10 @@ module Onetime
           config.send("#{actual_key}=", value)
         end
       end
+
+      development = conf[:development]
+      development[:enabled] ||= false
+      development[:frontend_host] ||= ''  # make sure this is set
 
       sentry = conf[:services][:sentry]
       if ::Otto.env?(:dev) && sentry && sentry[:enabled]
