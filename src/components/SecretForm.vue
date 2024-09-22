@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Icon } from '@iconify/vue';
+import { computed, ref, watch } from 'vue';
+
+import CustomDomainPreview from './CustomDomainPreview.vue';
+import SecretContentInputArea from './SecretContentInputArea.vue';
+import SecretFormPrivacyOptions from './SecretFormPrivacyOptions.vue';
+import GenerateButton from './secrets/GenerateButton.vue';
+import CreateButton from './secrets/CreateButton.vue';
 
 export interface Props {
   enabled?: boolean;
@@ -18,116 +23,113 @@ const props = withDefaults(defineProps<Props>(), {
   withGenerate: false,
 })
 
-const showPassphrase = ref(false);
-const currentPassphrase = ref('');
+const formFields = window.form_fields;
+const domainsEnabled = window.domains_enabled;
+const availableDomains = window.custom_domains || [];
+const defaultDomain = window.site_host;
 
-const togglePassphrase = () => {
-  showPassphrase.value = !showPassphrase.value;
+const hasInitialContent = computed(() => Boolean(formFields?.secret));
+
+// Add defaultDomain to the list of available domains if it's not already there
+if (!availableDomains.includes(defaultDomain)) {
+  availableDomains.push(defaultDomain);
+}
+
+// Function to get the saved domain or default to the first available domain
+const getSavedDomain = () => {
+  const savedDomain = localStorage.getItem('selectedDomain');
+  return savedDomain && availableDomains.includes(savedDomain)
+    ? savedDomain
+    : availableDomains[0];
 };
+
+// Initialize selectedDomain with the saved domain or default
+const selectedDomain = ref(getSavedDomain());
+
+// Watch for changes in selectedDomain and save to localStorage
+watch(selectedDomain, (newDomain) => {
+  localStorage.setItem('selectedDomain', newDomain);
+});
+
+const secretContent = ref('');
+const isFormValid = computed(() => {
+  return (secretContent.value.length > 0 || hasInitialContent.value);
+});
+
+// Function to update the selected domain
+const updateSelectedDomain = (domain: string) => {
+  selectedDomain.value = domain;
+};
+
+const isGenerateDisabled = computed(() => isFormValid.value);
+const isCreateDisabled = computed(() => !isFormValid.value);
 
 </script>
 
 <template>
-  <div class="">
-    <form id="createSecret"
-          method="post"
-          autocomplete="off"
-          action="/share"
-          class="form-horizontal"
-          :disabled="!props.enabled">
-      <input type="hidden"
-             name="utf8"
-             value="✓" />
-      <input type="hidden"
-             name="shrimp"
-             :value="shrimp" />
-      <textarea class="w-full p-2 mb-4 border rounded dark:bg-gray-800 dark:border-gray-700"
-                name="secret"
-                rows="6"
-                autofocus
-                autocomplete="off"
-                placeholder="Secret content goes here..."
-                aria-label="Secret content"></textarea>
+  <main class="min-w-[320px]">
+    <div class="">
 
-      <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded mb-4">
-        <h5 class="dark:text-white font-bold m-0 mb-4">Privacy Options</h5>
-        <div class="space-y-4">
-          <div class="flex justify-between items-center">
-            <label for="currentPassphrase" class="w-1/3">Passphrase:</label>
-            <div class="w-2/3 relative">
-              <input
-                :type="showPassphrase ? 'text' : 'password'"
-                id="currentPassphrase"
-                v-model="currentPassphrase"
-                autocomplete="unique-passphrase"
-                placeholder="A word or passphrase that's difficult to guess"
-                class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 pr-10"
-              >
-              <button
-                type="button"
-                @click="togglePassphrase()"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                <Icon
-                  :icon="showPassphrase ? 'heroicons-solid:eye' : 'heroicons-outline:eye-off'"
-                  class="h-5 w-5 text-gray-400 dark:text-gray-100"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
-          </div>
+      <form id="createSecret"
+            method="post"
+            autocomplete="off"
+            action="/share"
+            class="form-horizontal"
+            :disabled="!props.enabled">
+        <input type="hidden"
+               name="utf8"
+               value="✓" />
+        <input type="hidden"
+               name="shrimp"
+               :value="shrimp" />
+        <input type="hidden"
+               name="share_domain"
+               :value="selectedDomain" />
 
-          <div v-if="props.withRecipient"
-               class="flex justify-between items-center">
-            <label for="recipient"
-                   class="w-1/3">Recipient Address:</label>
-            <input type="email"
-                   id="recipient"
-                   name="recipient[]"
-                   class="w-2/3 p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                   placeholder="example@onetimesecret.com">
-          </div>
-          <div class="flex justify-between items-center">
-            <label for="lifetime"
-                   class="w-1/3">Lifetime:</label>
-            <select id="lifetime"
-                    name="ttl"
-                    class="w-2/3 p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
-              <option value="1209600.0">14 days</option>
-              <option value="604800.0"
-                      selected>7 days</option>
-              <option value="259200.0">3 days</option>
-              <option value="86400.0">1 day</option>
-              <option value="43200.0">12 hours</option>
-              <option value="14400.0">4 hours</option>
-              <option value="3600.0">1 hour</option>
-              <option value="1800.0">30 minutes</option>
-              <option value="300.0">5 minutes</option>
+        <!--
+            v-model:selectedDomain is equivalent to:
+              :selectedDomain="selectedDomain"
+              @update:selectedDomain="selectedDomain = $event"
+        -->
 
-            </select>
-          </div>
+        <!--
+          Domain selection and persistence logic:
+            - getSavedDomain() retrieves the saved domain from localStorage or defaults
+              to the first available domain
+                  - selectedDomain is initialized with getSavedDomain()
+                  - A watcher saves selectedDomain to localStorage on changes
+            - updateSelectedDomain() updates the selectedDomain ref when the child
+              component emits an update
+            - The template passes initialDomain to SecretContentInputArea and listens
+              for update:selectedDomain events
+            This setup allows SecretForm to manage domain state and persistence while
+            SecretContentInputArea handles the dropdown UI. The selected domain
+            persists across sessions and can be overridden when needed.
+        -->
+        <SecretContentInputArea :availableDomains="availableDomains"
+                                :initialDomain="selectedDomain"
+                                :initialContent="formFields?.secret || ''"
+                                :withDomainDropdown="domainsEnabled"
+                                @update:selectedDomain="updateSelectedDomain"
+                                @update:content="secretContent = $event" />
+
+        <CustomDomainPreview :default_domain="selectedDomain" />
+
+        <SecretFormPrivacyOptions :withRecipient="props.withRecipient"
+                                  :withExpiry="true"
+                                  :withPassphrase="true" />
+
+        <div class="flex w-full mb-4 space-x-2">
+          <GenerateButton :disabled="isGenerateDisabled"
+                          @click="$emit('generate')" />
+          <CreateButton :disabled="isCreateDisabled"
+                        :with-asterisk="withAsterisk"
+                        @click="$emit('create')" />
         </div>
-      </div>
 
-      <button type="submit"
-              class="text-xl w-full py-2 px-4 rounded mb-4
-              bg-orange-600 hover:bg-orange-700 text-white
-              font-bold2 "
-              name="kind"
-              value="share">
-        Create a secret link<span v-if="withAsterisk">*</span>
-      </button>
+      </form>
+    </div>
 
-      <button type="submit"
-              v-if="props.withGenerate"
-              class="w-full py-2 px-4 rounded mb-4
-              text-base
-              bg-gray-300 hover:bg-gray-400 text-gray-800
-              dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"
-              name="kind"
-              value="generate">
-        Or generate a random password
-      </button>
-    </form>
-  </div>
+  </main>
+
 </template>

@@ -1,9 +1,9 @@
-// https://eslint.org/docs/latest/use/getting-started
-// Run manually: pnpm run lint
+// eslint.config.mjs
 import globals from 'globals';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
+import pluginVueI18n from '@intlify/eslint-plugin-vue-i18n';
 
 export default [
   // Ignore everything except src directory
@@ -26,19 +26,21 @@ export default [
       },
     },
   },
-  {
-    rules: {
-      "no-explicit-any": "off",
-      "ban-types": "off",
-      "no-unused-vars": "error",
-      "no-undef": "error"
-    }
-  },
   // Directly integrate what would have been an override
   {
     files: ["src/views/*.vue", "src/layouts/*.vue"], // Target files in the views directory
     rules: {
       "vue/multi-word-component-names": "off" // Turn off the rule
     }
-  }
+  },
+  // Add Vue I18n plugin configuration
+  {
+    files: ['src/**/*.{js,ts,vue}'],
+    plugins: {
+      '@intlify/vue-i18n': pluginVueI18n,
+    },
+    rules: {
+      '@intlify/vue-i18n/no-deprecated-modulo-syntax': 'error',
+    },
+  },
 ];

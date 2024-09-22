@@ -1,3 +1,6 @@
+
+require 'httparty'
+
 module Onetime
   module Utils
     extend self
@@ -56,5 +59,4 @@ module Onetime
       text.gsub regex, '\\3*****\\4@\\6*****\\7'
     end
   end
-
 end

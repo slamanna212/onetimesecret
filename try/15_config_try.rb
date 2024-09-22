@@ -15,7 +15,7 @@
 require_relative '../lib/onetime'
 
 # Use the default config file for tests
-OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test')
+OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test.yaml')
 OT.boot! :cli
 
 @email_address = OT.conf[:emailer][:from]
@@ -23,7 +23,7 @@ OT.boot! :cli
 
 ## Finds a config path
 Onetime::Config.path.gsub("#{__dir__}/", '')
-#=> "../etc/config.test"
+#=> "../etc/config.test.yaml"
 
 ## Can load config
 @config = Onetime::Config.load
@@ -56,8 +56,8 @@ Onetime::Config.mapped_key(:every_developer_a_key)
 #=> :every_developer_a_key
 
 ## Config.find_configs returns an array of paths
-paths = Onetime::Config.find_configs('config.test')
-path = File.expand_path(File.join(__dir__, '..', 'etc', 'config.test'))
+paths = Onetime::Config.find_configs('config.test.yaml')
+path = File.expand_path(File.join(__dir__, '..', 'etc', 'config.test.yaml'))
 paths.include?(path)
 #=> true
 
@@ -146,3 +146,39 @@ OT.conf[:site][:authentication][:enabled] = true
 OT::Config.after_load(OT.conf)
 OT.conf.dig(:site, :authentication, :signin)
 #=> false
+
+## Default emailer mode is :smtp
+OT.conf[:emailer][:mode]
+#=> :smtp
+
+## Default emailer from address is "CHANGEME@example.com"
+OT.conf[:emailer][:from]
+#=> "CHANGEME@example.com"
+
+## Default emailer fromname is "Jan"
+OT.conf[:emailer][:fromname]
+#=> "Jan"
+
+## Default SMTP host is "localhost"
+OT.conf[:emailer][:host]
+#=> "localhost"
+
+## Default SMTP port is 587
+OT.conf[:emailer][:port]
+#=> 587
+
+## Default SMTP username is "CHANGEME"
+OT.conf[:emailer][:user]
+#=> nil
+
+## Default SMTP password is "CHANGEME"
+OT.conf[:emailer][:pass]
+#=> nil
+
+## Default SMTP auth is "login"
+OT.conf[:emailer][:auth]
+#=> "login"
+
+## Default SMTP TLS is true
+OT.conf[:emailer][:tls]
+#=> true

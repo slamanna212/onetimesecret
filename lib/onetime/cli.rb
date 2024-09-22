@@ -2,27 +2,9 @@ require 'drydock'
 require 'onetime'
 require 'familia/tools'
 
-
 class OT::CLI < Drydock::Command
   def init
     OT.boot! :cli
-  end
-
-  def entropy
-    puts OT::Entropy.count
-  end
-
-  def clear_entropy
-    require_sudo
-    OT::Entropy.values.clear
-    entropy
-  end
-
-  def generate_entropy
-    # require_sudo
-    option.count = 100_000 if option.count.to_i > 100_000
-    OT::Entropy.generate option.count
-    entropy
   end
 
   def move_keys

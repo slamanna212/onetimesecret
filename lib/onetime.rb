@@ -22,8 +22,15 @@ require 'sysinfo'
 
 require_relative 'onetime/core_ext'
 
-
-Familia.apiversion = nil
+# Ensure immediate flushing of stdout to improve real-time logging visibility.
+# This is particularly useful in development and production environments where
+# timely log output is crucial for monitoring and debugging purposes.
+#
+# Enabling sync can have a performance impact in high-throughput environments.
+#
+# NOTE: Use STDOUT the immuntable constant here, not $stdout (global var).
+#
+STDOUT.sync = ENV['STDOUT_SYNC'] && %w[true yes 1].include?(ENV['STDOUT_SYNC'])
 
 # Onetime is the core of the Onetime Secret application.
 # It contains the core classes and modules that make up
@@ -132,13 +139,18 @@ module Onetime
     end
 
     def print_banner
-      info "---  ONETIME #{OT.mode} v#{OT::VERSION}  #{'---' * 12}"
-      info "Sysinfo: #{@sysinfo.platform} (#{RUBY_VERSION})"
+      redis_info = Familia.redis.info
+      info "---  ONETIME #{OT.mode} v#{OT::VERSION.inspect}  #{'---' * 10}"
+      info "Sysinfo: #{@sysinfo.platform} (#{RUBY_VERSION}) sync:#{$stdout.sync}"
       info "Config: #{OT::Config.path}"
-      info "Redis:  #{Familia.uri.serverid}" # doesn't print the password
+      info "Redis (#{redis_info['redis_version']}): #{Familia.uri.serverid}" # servid doesn't print the password
+      info "Familia: #{Familia::VERSION}"
       info "Colonels: #{OT.conf[:colonels]}"
       if OT.conf[:site].key?(:authentication)
         info "Authentication: #{OT.conf[:site][:authentication]}"
+      end
+      if OT.conf[:site].key?(:domains)
+        info "Domains: #{OT.conf[:site][:domains]}"
       end
       if OT.conf[:development][:enabled]
         info "Frontend: #{OT.conf[:development][:frontend_host]}"
@@ -163,9 +175,9 @@ module Onetime
 
     def load_locales(locales = OT.conf[:locales] || ['en'])
       confs = locales.collect do |locale|
-        path = File.join(OT::Config.dirname, 'locale', locale)
+        path = File.join(Onetime::HOME, 'src', 'locales', "#{locale}.json")
         OT.ld "Loading locale #{locale}: #{File.exist?(path)}"
-        conf = OT::Config.load(path)
+        conf = JSON.parse(File.read(path), symbolize_names: true)
         [locale, conf]
       end
 
@@ -183,12 +195,16 @@ module Onetime
     end
 
     def stdout(prefix, msg)
+      return if STDOUT.closed?
+
       stamp = Time.now.to_i
       logline = "%s(%s): %s" % [prefix, stamp, msg]
       STDOUT.puts(logline)
     end
 
     def stderr(prefix, msg)
+      return if STDERR.closed?
+
       stamp = Time.now.to_i
       logline = "%s(%s): %s" % [prefix, stamp, msg]
       STDERR.puts(logline)

@@ -8,19 +8,24 @@ module Onetime
     UTILITY_PATHS = %w[~/.onetime /etc/onetime ./etc].freeze
     attr_reader :env, :base, :bootstrap
 
-    def load(path = self.path)
+    # Load a YAML configuration file, allowing for ERB templating within the file.
+    # This reads the file at the given path, processes any embedded Ruby (ERB) code,
+    # and then parses the result as YAML.
+    #
+    # @param path [String] (optional the path to the YAML configuration file
+    # @return [Hash] the parsed YAML data
+    #
+    def load(path=nil)
+      path ||= self.path
+
+      raise ArgumentError, "Missing config file" if path.nil?
       raise ArgumentError, "Bad path (#{path})" unless File.readable?(path)
 
       YAML.load(ERB.new(File.read(path)).result)
     rescue StandardError => e
-      OT.ld e.message
-      msg = if path =~ /locale/
-              "Error loading locale: #{path} (#{e.message})"
-            else
-              "Error loading config: #{path}"
-            end
-      OT.le msg
-      OT.le e.message, e.backtrace.join("\n")
+      OT.le "Error loading config: #{path}"
+      OT.le e.message
+      OT.ld e.backtrace.join("\n")
       Kernel.exit(1)
     end
 
@@ -39,6 +44,18 @@ module Onetime
         raise OT::Problem, "No `site.authentication` config found in #{path}"
       end
 
+      unless conf[:site]&.key?(:domains)
+        conf[:site][:domains] = { enabled: false }
+      end
+
+      unless conf[:site]&.key?(:plans)
+        conf[:site][:plans] = { enabled: false }
+      end
+
+      unless conf[:site]&.key?(:regions)
+        conf[:site][:regions] = { enabled: false }
+      end
+
       # Disable all authentication sub-features when main feature is off for
       # consistency, security, and to prevent unexpected behavior. Ensures clean
       # config state.
@@ -46,6 +63,31 @@ module Onetime
         OT.conf[:site][:authentication].each_key do |key|
           conf[:site][:authentication][key] = false
         end
+      end
+
+      if OT.conf.dig(:site, :domains, :enabled).to_s == "true"
+        cluster = conf.dig(:site, :domains, :cluster)
+        OT.ld "Setting OT::Cluster::Features #{cluster}"
+        klass = OT::Cluster::Features
+        klass.api_key = cluster[:api_key]
+        klass.cluster_ip = cluster[:cluster_ip]
+        klass.cluster_name = cluster[:cluster_name]
+        klass.vhost_target = cluster[:vhost_target]
+        OT.ld "Domains config: #{cluster}"
+        unless klass.api_key
+          raise OT::Problem, "No `site.domains.cluster` api key (#{klass.api_key})"
+        end
+      end
+
+      if OT.conf.dig(:site, :plans, :enabled).to_s == "true"
+        stripe_key = conf.dig(:site, :plans, :stripe_key)
+        unless stripe_key
+          raise OT::Problem, "No `site.plans.stripe_key` found in #{path}"
+        end
+
+        require 'stripe'
+        Stripe.api_key = stripe_key
+        #require_relative 'refinements/stripe_refinements'
       end
 
       mtc = conf[:mail][:truemail]
@@ -70,12 +112,18 @@ module Onetime
       development[:frontend_host] ||= ''  # make sure this is set
 
       sentry = conf[:services][:sentry]
-      if ::Otto.env?(:dev) && sentry && sentry[:enabled]
-        OT.ld "Setting up Sentry #{sentry}..."
+
+      if sentry&.dig(:enabled)
+        OT.info "Setting up Sentry #{sentry}..."
+        dsn = sentry&.dig(:dsn)
+
+        unless dsn
+          OT.le "No DSN"
+        end
 
         require 'sentry-ruby'
+        require 'stackprof'
 
-        dsn = sentry[:dsn]
         OT.info "[sentry-init] Initializing with DSN: #{dsn[0..10]}..."
         Sentry.init do |config|
           config.dsn = sentry[:dsn]
@@ -110,7 +158,7 @@ module Onetime
     end
 
     def find_configs(filename = nil)
-      filename ||= 'config'
+      filename ||= 'config.yaml'
       paths = Onetime.mode?(:cli) ? UTILITY_PATHS : SERVICE_PATHS
       paths.collect do |f|
         f = File.join File.expand_path(f), filename
@@ -134,6 +182,4 @@ module Onetime
     # An example mapping for testing.
     example_internal_key: :example_external_key
   }
-
-
 end

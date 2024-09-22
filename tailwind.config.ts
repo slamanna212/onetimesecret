@@ -51,9 +51,9 @@ export default {
      * files in the content array as well.
      *
      */
-    "./src/demo.html",
-    "./templates/web/**/*.html",
+    "./src/*.html",
     "./src/**/*.{vue,js,ts,jsx,tsx,mjs}",
+    "./templates/web/**/*.html",
   ],
 
   darkMode: 'class',
@@ -63,9 +63,11 @@ export default {
       sans: defaultTheme.fontFamily.sans,
       /* In CSS: font-family: theme('fontFamily.brand'); */
       brand: ['Zilla Slab', ...defaultTheme.fontFamily.serif],
+      mono: defaultTheme.fontFamily.mono,
     },
     extend: {
       colors: {
+        // https://javisperez.github.io/tailwindcolorshades/?flamingo=dc4a22&guardsman-red=23b5dd
         brand: {
           50: '#fcf8f2',
           100: '#fcf4e8',
@@ -77,35 +79,100 @@ export default {
           700: '#a32d12',
           800: '#85200c',
           900: '#631507',
-          950: '#400b03'
+          950: '#400b03',
         },
+        branddim: {
+          '50': '#fcf8f2',
+          '100': '#faf0e3',
+          '200': '#f0d7bd',
+          '300': '#e8bb99',
+          '400': '#d67e56',
+          '500': '#c43d1b',
+          '600': '#b03317',
+          '700': '#94270f',
+          '800': '#751b09',
+          '900': '#591205',
+          '950': '#380902',
+        },
+        brandcomp: {
+          50: '#f2fbfc',
+          100: '#e8fafc',
+          200: '#c3f0f7',
+          300: '#a0e6f2',
+          400: '#5fcfe8',
+          500: '#23b5dd',
+          600: '#1c9cc7',
+          700: '#1478a6',
+          800: '#0d5985',
+          900: '#073b63',
+          950: '#032140',
+        },
+        brandcompdim: {
+          '50': '#f2fbfc',
+          '100': '#e3f7fa',
+          '200': '#bfebf2',
+          '300': '#99dae8',
+          '400': '#57bdd9',
+          '500': '#1c9cc7',
+          '600': '#1786b3',
+          '700': '#0f6594',
+          '800': '#0a4c78',
+          '900': '#053359',
+          '950': '#021e3b'
+      }
+
       },
-    }
+    },
+    // Don't mess with the scaling. rem == root em (ie. <html>). Everything is relative to that.
+    //fontSize: {
+    //  'sm': '0.9rem',
+    //  'base': '1rem',
+    //  'lg': '1.25rem',
+    //  'xl': '1.30rem',
+    //  '2xl': '1.563rem',
+    //  '3xl': '1.953rem',
+    //  '4xl': '2.441rem',
+    //  '5xl': '3.052rem',
+    //}
   },
   plugins: [
     forms(),
     typography(),
 
     /* TODO: Check if we can use this in place of the fonts.css */
-    //function({ addBase, theme }) {
-    //  addBase({
-    //    '@font-face': [
-    //      {
-    //        fontFamily: 'Zilla Slab',
-    //        fontWeight: '400',
-    //        fontStyle: 'normal',
-    //        fontDisplay: 'swap',
-    //        src: 'url("/fonts/ZillaSlab-Regular.woff2") format("woff2")',
-    //      },
-    //      {
-    //        fontFamily: 'Zilla Slab',
-    //        fontWeight: '700',
-    //        fontStyle: 'normal',
-    //        fontDisplay: 'swap',
-    //        src: 'url("/fonts/ZillaSlab-Bold.woff2") format("woff2")',
-    //      },
-    //    ],
-    //  })
-    //},
+    function({ addBase, theme }) {
+      addBase({
+        '@font-face': [
+          {
+            fontFamily: 'Zilla Slab',
+            src: "url('./fonts/zs/ZillaSlab-Regular.woff2') format('woff2'), url('./fonts/zs/ZillaSlab-Regular.woff') format('woff')",
+            fontWeight: '400',
+            fontStyle: 'normal',
+            fontDisplay: 'fallback',
+          },
+          {
+            fontFamily: 'Zilla Slab',
+            src: "url('./fonts/zs/ZillaSlab-Bold.woff2') format('woff2'), url('./fonts/zs/ZillaSlab-Bold.woff') format('woff')",
+            fontWeight: '700',
+            fontStyle: 'normal',
+            fontDisplay: 'fallback',
+          },
+          {
+            fontFamily: 'Zilla Slab',
+            src: "url('./fonts/zs/ZillaSlab-Italic.woff2') format('woff2'), url('./fonts/zs/ZillaSlab-Italic.woff') format('woff')",
+            fontWeight: '400',
+            fontStyle: 'italic',
+            fontDisplay: 'fallback',
+          },
+          {
+            fontFamily: 'Zilla Slab',
+            src: "url('./fonts/zs/ZillaSlab-BoldItalic.woff2') format('woff2'), url('./fonts/zs/ZillaSlab-BoldItalic.woff') format('woff')",
+            fontWeight: '700', // bold weight for italic
+            fontStyle: 'italic',
+            fontDisplay: 'fallback',
+          },
+        ],
+      })
+    },
   ],
 };

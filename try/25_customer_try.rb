@@ -16,16 +16,17 @@
 # behavior without needing to run the full application, allowing for targeted testing
 # of these specific scenarios.
 
-
+#ENV['FAMILIA_TRACE'] = '1'
 require_relative '../lib/onetime'
 
+#Familia.debug = true
+
 # Load the app
-OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test')
+OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test.yaml')
 OT.boot! :app
 
 # Setup some variables for these tryouts
-@now = Time.now
-@model_class = OT::Customer
+@now = Time.now.strftime("%Y%m%d%H%M%S")
 @email_address = "tryouts+#{@now}@onetimesecret.com"
 @cust = OT::Customer.new @email_address
 
@@ -36,16 +37,51 @@ OT.boot! :app
 #=> nil
 
 ## New instance of customer has a custid
+p @cust.to_h
 @cust.custid
 #=> @email_address
 
 ## New instance of customer has a rediskey
+p [:email, @email_address]
 @cust.rediskey
 #=> "customer:#{@email_address}:object"
 
-## Object name and rediskey are equivalent
-@cust.rediskey.eql?(@cust.name)
+## Can "create" an anonymous user (more like simulate)
+@anonymous = OT::Customer.anonymous
+@anonymous.custid
+#=> 'anon'
+
+## Anonymous is a Customer class
+@anonymous.class
+#=> OT::Customer
+
+## Anonymous knows it's anonymous
+@anonymous.anonymous?
 #=> true
+
+## Anonymous is frozen in time
+@anonymous.frozen?
+#=> true
+
+## Anonymous doesn't exist
+#@anonymous.destroy!
+@anonymous.exists?
+#=> false
+
+## Trying to save anonymous raises hell on earth
+begin
+  @anonymous.save
+rescue OT::Problem => e
+  [e.class, e.message]
+end
+#=> [Onetime::Problem, "Anonymous cannot be saved Onetime::Customer customer:anon:object"]
+
+## Object name and rediskey are no longer equivalent.
+## This is a reference back to Familia v0.10.2 era which
+## used to have a name method that returned the key.
+@cust.respond_to?(:name) ||
+(@cust.respond_to?(:name) && @cust.name.eql?(@cust.rediskey))
+#=> false
 
 ## New un-saved instance of customer has a role of 'customer'
 @cust.role
@@ -58,6 +94,11 @@ OT.boot! :app
 ## New un-saved instance of customer is not verified
 @cust.verified?
 #=> false
+
+## Customers have a default ttl of 0
+ttl = @cust.ttl
+[ttl.class, ttl]
+#=> [Integer, 0]
 
 ## New un-saved instance of customer is not active
 @cust.active?
@@ -98,3 +139,19 @@ OT.boot! :app
 @cust.destroy_requested!
 @cust.verified?
 #=> false
+
+## Customer.values has the correct rediskey
+OT::Customer.values.rediskey
+#=> "onetime:customer"
+
+## Customer.domains has the correct rediskey
+OT::Customer.domains.rediskey
+#=> "onetime:customers:domain"
+
+## Customer.values is a Familia::SortedSet
+OT::Customer.values.class
+#=> Familia::SortedSet
+
+## Customer.domains is a Familia::HashKey
+OT::Customer.domains.class
+#=> Familia::HashKey

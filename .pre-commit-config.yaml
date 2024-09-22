@@ -32,8 +32,11 @@
 default_install_hook_types:
   - pre-commit
   - prepare-commit-msg
-# default_stages:
-#   - pre-commit
+  - post-commit
+  - post-checkout
+  - post-merge
+default_stages:
+   - pre-commit
 #   - prepare-commit-msg
 
 fail_fast: true
@@ -67,13 +70,11 @@ repos:
     rev: v1.64.1  # Use the ref you want to point at
     hooks:
       - id: rubocop
+        stages: [pre-commit]
         name: rubocop
         description: Enforce the community Ruby Style Guide with RuboCop
         entry: "bundle exec rubocop --config .rubocop.yml --format json --fail-level warning"
         types: ['ruby']
-        # language: ruby
-        # language_version: 3.2.4
-        # args: ['--force-exclusion']
 
   - repo: https://github.com/avilaton/add-msg-issue-prefix-hook
     rev: v0.0.11
@@ -90,6 +91,7 @@ repos:
     rev: v8.56.0  # Use the latest version
     hooks:
       - id: eslint
+        stages: [pre-commit]
         files: \.(js|ts|vue)$
         types: [file]
         additional_dependencies:
@@ -97,3 +99,13 @@ repos:
           - eslint-plugin-vue
           - "@typescript-eslint/eslint-plugin"
           - "@typescript-eslint/parser"
+
+  - repo: local
+    hooks:
+      - id: register-build
+        stages: [post-commit, post-checkout, post-merge]
+        name: Record the current commit hash into an untracked file
+        entry: "sh -c 'git rev-parse --short HEAD > .commit_hash.txt; echo Commit hash recorded; cat .commit_hash.txt VERSION.yml'"
+        language: system
+        always_run: true
+        pass_filenames: false

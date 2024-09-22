@@ -1,10 +1,10 @@
-require_relative 'helpers'
+require_relative 'view_helpers'
 require_relative 'secret_elements'
 
 module Onetime
   class App
     class View < Mustache
-      include Onetime::App::Views::Helpers
+      include Onetime::App::Views::ViewHelpers
 
       self.template_path = './templates/web'
       self.template_extension = 'html'
@@ -19,23 +19,26 @@ module Onetime
         @locale ||= req.env['ots.locale'] || OT.conf[:locales].first.to_s || 'en' unless req.nil?
         @messages = { :info => [], :error => [] }
         is_default_locale = OT.conf[:locales].first.to_s == locale
-        is_subdomain = req.nil? ? nil : !req.env['ots.subdomain'].nil?
 
-        # TODO: Make better use of fetch to avoid nil checks. Esp important
+        # TODO: Make better use of fetch/dig to avoid nil checks. Esp important
         # across release versions where the config may change.
         site = OT.conf.fetch(:site, {})
-        base_domain = site[:domain]
+        domains = site.fetch(:domains, {})
+        authentication = site.fetch(:authentication, {})
 
-        # If not set, the frontend_host is the same as the base_domain and we can
-        # leave the absolute path empty as-is without a host.
+        # If not set, the frontend_host is the same as the site_host and
+        # we can leave the absolute path empty as-is without a host.
         development = OT.conf.fetch(:development, {})
         frontend_development = development[:enabled] || false
         frontend_host = development[:frontend_host] || ''
 
+        cust ||= OT::Customer.anonymous
         authenticated = sess && sess.authenticated? && ! cust.anonymous?
+
         self[:js], self[:css] = [], []
         self[:is_default_locale] = is_default_locale
         self[:supported_locales] = OT.conf[:locales]
+        self[:support_host] = site.dig(:support, :host) # defaults to nil
         self[:authentication] = site[:authentication]
         self[:description] = i18n[:COMMON][:description]
         self[:keywords] = i18n[:COMMON][:keywords]
@@ -44,33 +47,76 @@ module Onetime
         self[:authenticated] = authenticated
         self[:display_promo] = false
         self[:display_feedback] = true
-        self[:colonel] = cust.role?(:colonel) if cust
         self[:feedback_text] = i18n[:COMMON][:feedback_text]
-        self[:base_domain] = base_domain
-        self[:is_subdomain] = is_subdomain
         self[:frontend_host] = frontend_host
         self[:frontend_development] = frontend_development
         self[:no_cache] = false
         self[:display_sitenav] = true
+
         self[:jsvars] = []
+        # Pass the authentication flag settings to the frontends.
+        self[:jsvars] << jsvar(:authentication, authentication)
         self[:jsvars] << jsvar(:shrimp, sess.add_shrimp) if sess
-        self[:jsvars] << jsvar(:custid, cust.custid)
-        self[:jsvars] << jsvar(:cust, cust.safe_dump)
-        self[:jsvars] << jsvar(:email, cust.email)
-        self[:jsvars] << jsvar(:vue_component_name, self.class.vue_component_name)
+
+        if authenticated && cust
+          self[:colonel] = cust.role?(:colonel)
+          self[:metadata_record_count] = cust.metadata_list.length
+          self[:jsvars] << jsvar(:metadata_record_count, self[:metadata_record_count])
+
+          self[:domains_enabled] = domains[:enabled] || false  # only for authenticated
+          self[:jsvars] << jsvar(:domains_enabled, self[:domains_enabled])
+
+          self[:jsvars] << jsvar(:custid, cust.custid)
+          self[:jsvars] << jsvar(:cust, cust.safe_dump)
+          self[:jsvars] << jsvar(:email, cust.email)
+
+          # TODO: We can remove this after we update the Account view to use
+          # the value of cust.created to calculate the customer_since value
+          # on-the-fly and in the time zone of the user.
+          self[:jsvars] << jsvar(:customer_since, epochdom(cust.created))
+
+          # There's no custom domain list when the feature is disabled.
+          if self[:domains_enabled]
+            self[:custom_domains_record_count] = cust.custom_domains.length
+            self[:custom_domains] = cust.custom_domains_list.collect { |obj| obj.display_domain }.sort
+            self[:jsvars] << jsvar(:custom_domains_record_count, self[:custom_domains_record_count])
+            self[:jsvars] << jsvar(:custom_domains, self[:custom_domains])
+          end
+        end
+
+        unless sess.nil?
+          self[:gravatar_uri] = gravatar(cust.email) unless cust.anonymous?
+
+          if cust.pending? && self.class != Onetime::App::Views::Shared
+            add_message i18n[:COMMON][:verification_sent_to] + " #{cust.custid}."
+          else
+            add_errors sess.get_error_messages
+          end
+
+          add_messages sess.get_info_messages
+          add_form_fields sess.get_form_fields!
+        end
+
+        # Link to the pricing page can be seen regardless of authentication status
+        self[:plans_enabled] = site.dig(:plans, :enabled) || false
+        self[:jsvars] << jsvar(:plans_enabled, self[:plans_enabled])
+
+        self[:jsvars] << jsvar(:vue_component_name, self.vue_component_name)
         self[:jsvars] << jsvar(:locale, locale)
         self[:jsvars] << jsvar(:is_default_locale, is_default_locale)
+        self[:jsvars] << jsvar(:supported_locales, self[:supported_locales])
         self[:jsvars] << jsvar(:frontend_host, frontend_host)
-        self[:jsvars] << jsvar(:base_domain, base_domain)
-        self[:jsvars] << jsvar(:is_subdomain, is_subdomain)
         self[:jsvars] << jsvar(:authenticated, authenticated)
+        self[:jsvars] << jsvar(:site_host, site[:host])
 
-        # TODO: We can remove this after we update the Account view to use
-        # the value of cust.created to calculate the customer_since value
-        # on-the-fly and in the time zone of the user.
-        self[:jsvars] << jsvar(:customer_since, epochdom(cust.created))
+        # The form fields hash is populated by handle_form_error so only when there's
+        # been a form error in the request immediately prior to this one being served
+        # now will this have any value at all. This is used to repopulate the form
+        # fields with the values that were submitted so the user can try again
+        # without having to re-enter everything.
+        self[:jsvars] << jsvar(:form_fields, self.form_fields)
 
-        self[:jsvars] << jsvar(:ot_version, OT::VERSION)
+        self[:jsvars] << jsvar(:ot_version, OT::VERSION.to_s)
         self[:jsvars] << jsvar(:ruby_version, "#{OT.sysinfo.vm}-#{OT.sysinfo.ruby.join}")
 
         plans = Onetime::Plan.plans.transform_values do |plan|
@@ -82,47 +128,20 @@ module Onetime
         self[:display_options] = true
         self[:display_recipients] = sess.authenticated?
         self[:display_masthead] = true
-        if self[:is_subdomain]
-          tmp = req.env['ots.subdomain']
-          self[:subdomain] = tmp.to_hash
-          self[:subdomain]['homepage'] = '/'
-          self[:subdomain]['company_domain'] = tmp.company_domain || 'onetimesecret.com'
-          self[:subdomain]['company'] = "Onetime Secret"
-          self[:subtitle] = self[:subdomain]['company'] || self[:subdomain]['company_domain']
-          self[:display_feedback] = sess.authenticated?
-          self[:display_faq] = false
-          self[:actionable_visitor] = sess.authenticated?
-          self[:override_styles] = true
-          self[:primary_color] = req.env['ots.subdomain'].primary_color
-          self[:secondary_color] = req.env['ots.subdomain'].secondary_color
-          self[:border_color] = req.env['ots.subdomain'].border_color
-          self[:banner_url] = req.env['ots.subdomain'].logo_uri
-          self[:display_otslogo] = self[:banner_url].to_s.empty?
-          self[:with_broadcast] = false
-        else
-          self[:subtitle] = "Onetime"
-          self[:display_faq] = true
-          self[:display_otslogo] = true
-          self[:actionable_visitor] = true
-          # NOTE: uncomment the following line to show the broadcast
-          #self[:with_broadcast] = ! self[:authenticated]
-        end
-        unless sess.nil?
-          self[:gravatar_uri] = gravatar(cust.email) unless cust.anonymous?
 
-          if cust.pending? && self.class != Onetime::App::Views::Shared
-            add_message i18n[:COMMON][:verification_sent_to] + " #{cust.custid}."
-          else
-            add_error sess.error_message!
-          end
+        self[:subtitle] = "Onetime"
+        self[:display_faq] = true
+        self[:display_otslogo] = true
+        self[:actionable_visitor] = true
 
-          add_message sess.info_message!
-          add_form_fields sess.get_form_fields!
-        end
         @plan = Onetime::Plan.plan(cust.planid) unless cust.nil?
         @plan ||= Onetime::Plan.plan('anonymous')
         @is_paid = plan.paid?
-        init *args if respond_to? :init
+
+        # So the list of template vars shows up sorted variable name
+        self[:jsvars] = self[:jsvars].sort_by { |item| item[:name] }
+
+        init(*args) if respond_to? :init
       end
 
       def i18n
@@ -142,29 +161,20 @@ module Onetime
             :original_price => plan.price.to_i,
             :ttl => plan.options[:ttl].in_days.to_i,
             :size => plan.options[:size].to_i,
-            :api => plan.options[:api] ? 'Yes' : 'No',
+            :api => plan.options[:api],
             :name => plan.options[:name],
+            :dark_mode => plan.options[:dark_mode],
+            :custom_domains => plan.options[:custom_domains],
+            :email => plan.options[:email],
             :planid => planid
           }
           self[plan.planid][:price_adjustment] = (plan.calculated_price.to_i != plan.price.to_i)
         end
 
-        @plans = [:individual_v1, :professional_v1, :agency_v1]
+        @plans = [:basic, :identity, :dedicated]
 
-        unless cust.anonymous?
-          plan_idx = case cust.planid
-          when /personal/
-            0
-          when /professional/
-            1
-          when /agency/
-            2
-          end
-          @plans[plan_idx] = cust.planid unless plan_idx.nil?
-        end
-        self[:default_plan] = self[@plans.first.to_s] || self['individual_v1']
+        self[:default_plan] = self[@plans.first.to_s] || self['basic']
 
-        OT.ld self[:default_plan].to_json
         self[:planid] = self[:default_plan][:planid]
       end
 
@@ -184,23 +194,39 @@ module Onetime
       end
 
       def add_message msg
-        messages[:info] << msg unless msg.to_s.empty?
+        messages[:info] << {type: 'info', content: msg} unless msg.to_s.empty?
+      end
+
+      def add_messages *msgs
+        messages[:info].concat msgs.flatten unless msgs.flatten.empty?
       end
 
       def add_error msg
-        messages[:error] << msg unless msg.to_s.empty?
+        messages[:error] << {type: 'error', content: msg} unless msg.to_s.empty?
+      end
+
+      def add_errors *msgs
+        messages[:error].concat msgs.flatten unless msgs.flatten.empty?
       end
 
       def add_form_fields hsh
         (self.form_fields ||= {}).merge! hsh unless hsh.nil?
       end
 
+      # Each page has exactly one #app element and each view can have its
+      # own Vue component. This method allows setting the component name
+      # that is created and mounted in main.ts. If not set, the component
+      # name is derived from the view class name.
+      attr_writer :vue_component_name
+      def vue_component_name
+        @vue_component_name || self.class.vue_component_name
+      end
+
       class << self
-        attr_accessor :pagename
-        # Each page has exactly one #app element and each view can have its
-        # own Vue component. This method allows setting the component name
-        # that is created and mounted in main.ts. If not set, the component
-        # name is derived from the view class name.
+        attr_accessor :pagename, :vue_component_name
+
+        # Set the Vue component at the class level. Each view instance
+        # can override this value with its own #vue_component_name method.
         attr_writer :vue_component_name
         def vue_component_name
           @vue_component_name || self.name.split('::').last

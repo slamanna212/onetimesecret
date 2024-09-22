@@ -25,7 +25,7 @@ Dotenv.load('.env')
 # e.g. Make sure to set these in your .env file:
 
 require_relative '../lib/onetime'
-OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test')
+OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test.yaml')
 OT.boot! :app
 
 @now = DateTime.now
@@ -133,7 +133,7 @@ Truemail.validate(@invalid_no_domain, with: :regex).result.valid?
 #=> false
 
 ## Truemail knows an invalid email address (via mx)
-Truemail.validate(@invalid_no_tld, with: mx).result.valid?
+Truemail.validate(@invalid_no_tld, with: :mx).result.valid?
 #=> false
 
 ## Truemail knows an invalid email address (via smtp)

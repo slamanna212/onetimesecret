@@ -1,7 +1,6 @@
 
 require 'mustache'
 
-
 class Onetime::App
   module Mail
 
@@ -25,25 +24,36 @@ class Onetime::App
         self[:secret] = secret
         self[:custid] = cust.custid
         self[:email_address] = recipient
-        self.subdomain = cust.load_subdomain if cust.has_key?(:cname)
-        if self.subdomain
-          self[:from_name] = subdomain['contact']
-          self[:from] = subdomain['email']
-          self[:signature_link] = subdomain['homepage']
-          emailer.from = self[:from]
-          emailer.fromname = self[:from_name]
-        else
-          self[:from_name] = OT.conf[:emailer][:fromname]
-          self[:from] = OT.conf[:emailer][:from]
-          self[:signature_link] = 'https://onetimesecret.com/'
-          emailer.fromname = 'Onetime Secret'
-        end
+        self[:from_name] = OT.conf[:emailer][:fromname]
+        self[:from] = OT.conf[:emailer][:from]
+        self[:signature_link] = 'https://onetimesecret.com/'
+        emailer.fromname = 'Onetime Secret'
       end
       def subject
         i18n[:email][:subject] % [self[:custid]] # e.g. "ABC" sent you a secret
       end
-      def verify_uri
+      def display_domain
+        secret_display_domain self[:secret]
+      end
+      def uri_path
         secret_uri self[:secret]
+      end
+    end
+
+    class SupportMessage < OT::App::Mail::Base
+      attr_reader :subject
+      def init from_name, subject
+        @subject = subject
+        self[:custid] = cust.custid
+        self[:email_address] = cust.custid
+        self[:from_name] = from_name
+        self[:from] = OT.conf[:emailer][:from]
+        self[:signature_link] = baseuri
+        emailer.fromname = from_name
+      end
+
+      def special_fortune
+        OT::Utils.random_fortune
       end
     end
 
@@ -66,7 +76,6 @@ class Onetime::App
         self[:secret] = secret
         self[:custid] = cust.custid
         self[:email_address] = recipient
-        self.subdomain = cust.load_subdomain if cust.has_key?(:cname)
       end
       def subject
         i18n[:email][:subject] % [self[:ticketno]]

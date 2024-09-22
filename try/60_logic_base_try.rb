@@ -19,19 +19,19 @@
 require_relative '../lib/onetime'
 
 # Load the app
-OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test')
+OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test.yaml')
 OT.boot! :app
 
 # Setup some variables for these tryouts
 @now = DateTime.now
 @from_address = OT.conf.dig(:emailer, :from)
 @email_address = 'tryouts@onetimesecret.com'
-@sess = OT::Session.new '255.255.255.255', :anon
+@sess = OT::Session.new '255.255.255.255', 'anon'
 @cust = OT::Customer.new @email_address
 @sess.event_clear! :send_feedback
 @params = {}
 @locale = 'en'
-@obj = OT::Logic::CreateAccount.new @sess, @cust
+@obj = OT::Logic::Account::CreateAccount.new @sess, @cust
 
 # A generator for valid params for creating an account
 @valid_params = lambda do
@@ -54,7 +54,7 @@ end
 
 ## Can create CreateAccount instance
 @obj.class
-#=> Onetime::Logic::CreateAccount
+#=> Onetime::Logic::Account::CreateAccount
 
 ## Knows an invalid address
 @obj.valid_email?('bogusjourney')
@@ -74,19 +74,19 @@ end
 #=> true
 
 ## Can create account and it's not verified by default.
-sess = OT::Session.create '255.255.255.255', :anon
+sess = OT::Session.create '255.255.255.255', 'anon'
 cust = OT::Customer.new
-logic = OT::Logic::CreateAccount.new sess, cust, @valid_params.call, 'en'
+logic = OT::Logic::Account::CreateAccount.new sess, cust, @valid_params.call, 'en'
 logic.raise_concerns
 logic.process
 [logic.autoverify, logic.cust.verified, OT.conf.dig(:site, :authentication, :autoverify)]
 #=> [false, 'false', false]
 
 ## Can create account and have it auto-verified.
-sess = OT::Session.create '255.255.255.255', :anon
+sess = OT::Session.create '255.255.255.255', 'anon'
 cust = OT::Customer.new
 OT.conf[:site][:authentication][:autoverify] = true # force the config to be true
-logic = OT::Logic::CreateAccount.new sess, cust, @valid_params.call, 'en'
+logic = OT::Logic::Account::CreateAccount.new sess, cust, @valid_params.call, 'en'
 logic.raise_concerns
 logic.process
 [logic.autoverify, logic.cust.verified, OT.conf.dig(:site, :authentication, :autoverify)]

@@ -3,7 +3,7 @@
 # These tryouts test the authentication-related routes
 # and how they respond based on the authentication
 # settings in etc/config. (NOTE: In test the file is
-# etc/config.test).
+# etc/config.test.yaml).
 #
 # The tryouts for POST requests are disabled because
 # are returning 302 nil location responses.
@@ -15,7 +15,7 @@ require 'rack/mock'
 require_relative '../lib/onetime'
 
 # Use the default config file for tests
-OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test')
+OT::Config.path = File.join(__dir__, '..', 'etc', 'config.test.yaml')
 OT.boot! :tryouts
 
 # Initialize the Rack application and create a mock request
@@ -96,14 +96,22 @@ response = @mock_request.get('/api/v1/status')
 
 ## Can access the API share endpoint
 response = @mock_request.post('/api/v1/create')
-[response.status, response.body]
-#=> [404, '{"message":"You did not provide anything to share"}']
+content = JSON.parse(response.body)
+message = content.delete('message')
+[response.status, message]
+#=> [404, "You did not provide anything to share"]
 
 ## Can access the API generate endpoint
 response = @mock_request.post('/api/v1/generate')
-content = JSON.parse(response.body) rescue {}
+content = JSON.parse(response.body)
 [response.status, content["custid"]]
 #=> [200, 'anon']
+
+## Can post to a bogus endpoint and get a 404
+response = @mock_request.post('/api/v1/generate2')
+content = JSON.parse(response.body)
+[response.status, content["custid"]]
+#=> [404, nil]
 
 
 # Colonel Routes
