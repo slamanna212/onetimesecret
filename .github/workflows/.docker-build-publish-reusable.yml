@@ -32,9 +32,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Record commit hash and display version info
+        id: commit
         run: |
-          git rev-parse --short HEAD > .commit_hash.txt
-          echo Commit hash recorded
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          echo "COMMIT_HASH=${COMMIT_HASH}" >> $GITHUB_OUTPUT
+          echo ${COMMIT_HASH} > .commit_hash.txt
+          echo "Commit hash recorded: ${COMMIT_HASH}"
           head -4 .commit_hash.txt package.json
 
       - name: Set up QEMU
@@ -86,3 +89,8 @@ jobs:
           provenance: false
           annotations: ${{ steps.meta.outputs.annotations }}
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            COMMIT_HASH=${{ steps.commit.outputs.COMMIT_HASH }}
+          # Add this line to include .commit_hash.txt in the build context
+          secrets: |
+            "commit_hash_file=.commit_hash.txt"
