@@ -96,7 +96,25 @@
       "burn_confirmation_title": "Burn Secret Confirmation",
       "burn_confirmation_message": "Are you sure you want to burn this secret? This action cannot be undone.",
       "confirm_burn": "Yes, burn this secret",
-      "burn_security_notice": "For security, burning a secret will permanently delete it and prevent anyone from accessing it."
+      "burn_security_notice": "For security, burning a secret will permanently delete it and prevent anyone from accessing it.",
+
+      "loading": "Loading...",
+      "secret_link": "Secret Link",
+      "security_details": "Security Details",
+      "no_passphrase": "No Passphrase Required",
+      "unlimited_views": "Unlimited Views",
+      "recipients_count": "{count} Recipients",
+      "time_remaining": "Time Remaining",
+      "expired": "Expired",
+      "days_remaining": "{count} Days Left",
+      "hours_remaining": "{count} Hours Left",
+      "minutes_remaining": "{count} Minutes Left",
+      "sharing_instructions": "Sharing Instructions",
+      "share_link_instruction": "Share this link with the intended recipient",
+      "share_passphrase_instruction": "Share the passphrase separately through a secure channel",
+      "secure_channel_instruction": "Use a different secure channel to share sensitive information",
+      "actions": "Actions",
+      "help_section": "Help Section"
     },
     "STATUS": {
       "active": "Active",
