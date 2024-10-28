@@ -1,67 +1,85 @@
 <template>
-  <div class="mb-4">
-    <p class="text-base text-gray-600 dark:text-gray-400 mb-2">{{ $t('web.private.pretext') }}</p>
+  <div
+       class="relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <!-- Secret Link Display -->
+    <div class="flex items-center px-4 py-3">
+      <div class="flex-grow min-w-0">
+        <input ref="linkInput"
+               type="text"
+               readonly
+               :value="metadata.share_url"
+               class="w-full bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-gray-100 font-mono text-sm"
+               aria-label="Secret link" />
+      </div>
 
-    <div class="relative">
-      <input id="secreturi"
-             class="w-full pr-10 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-             :value="metadata.share_url"
-             readonly />
-      <button @click="copySecretUrl"
-              :title="isCopied ? 'Copied!' : 'Copy to clipboard'"
-              class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              aria-label="Copy to clipboard">
-        <svg v-if="!isCopied"
-             xmlns="http://www.w3.org/2000/svg"
-             class="h-5 w-5"
-             fill="none"
-             viewBox="0 0 24 24"
-             stroke="currentColor"
-             width="20"
-             height="20">
-          <path stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-        <svg v-else
-             xmlns="http://www.w3.org/2000/svg"
-             class="h-5 w-5 text-green-500"
-             fill="none"
-             viewBox="0 0 24 24"
-             stroke="currentColor"
-             width="20"
-             height="20">
-          <path stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7" />
-        </svg>
-      </button>
+      <div class="flex-shrink-0 ml-4 flex items-center gap-2">
+        <button @click="copyToClipboard"
+                class="inline-flex items-center justify-center p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
+                :class="{ 'text-green-500 dark:text-green-400': copied }">
+          <Icon :icon="copied ? 'material-symbols:check' : 'material-symbols:content-copy-outline'"
+                class="w-5 h-5" />
+          <span class="sr-only">{{ copied ? 'Copied!' : 'Copy to clipboard' }}</span>
+        </button>
+      </div>
     </div>
 
-    <p v-if="details.has_passphrase"
-       class="mt-2 font-bold text-gray-800 dark:text-gray-200">
-      {{ $t('web.private.requires_passphrase') }}
-    </p>
+    <!-- Security Notice -->
+    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-2 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+        <Icon icon="material-symbols:shield-outline"
+              class="w-4 h-4 mr-2" />
+        {{ $t('web.private.share_link_securely') }}
+      </div>
+    </div>
+
+    <!-- Copy Feedback Toast -->
+    <div v-if="showToast"
+         class="absolute top-0 right-0 mt-2 mr-2 px-3 py-1 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-md shadow-lg transform transition-all duration-300"
+         :class="{ 'opacity-0 translate-y-1': !showToast, 'opacity-100 translate-y-0': showToast }">
+      {{ $t('web.COMMON.copied_to_clipboard') }}
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
-import { MetadataData, MetadataDetails } from '@/types/onetime.d'
-import { useClipboard } from '@/composables/useClipboard'
+import type { MetadataData, MetadataDetails } from '@/types/onetime';
+import { Icon } from '@iconify/vue';
+import { ref } from 'vue';
 
 interface Props {
   metadata: MetadataData;
   details: MetadataDetails;
 }
 
-const props = defineProps<Props>()
+defineProps<Props>();
 
-const { isCopied, copyToClipboard } = useClipboard()
+const copied = ref(false);
+const showToast = ref(false);
+const linkInput = ref<HTMLInputElement>();
 
-const copySecretUrl = () => {
-  copyToClipboard(props.metadata.share_url)
-}
+const copyToClipboard = async () => {
+  if (!linkInput.value) return;
+
+  try {
+    await navigator.clipboard.writeText(linkInput.value.value);
+    copied.value = true;
+    showToast.value = true;
+
+    // Reset copy icon
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
+
+    // Hide toast
+    setTimeout(() => {
+      showToast.value = false;
+    }, 1500);
+
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+
+    linkInput.value.select();
+    document.execCommand('copy'); // fallback for older browsers
+  }
+};
 </script>
