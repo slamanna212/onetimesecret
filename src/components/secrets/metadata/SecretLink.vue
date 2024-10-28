@@ -4,14 +4,12 @@
     rounded-lg border
     bg-white
     dark:bg-gray-800 dark:border-gray-700
-    border-gray-200
-  ">
+    border-gray-200">
     <!-- Success Indicator (Subtle) -->
     <div class="
       absolute top-0 left-0
       w-full h-1
-      bg-gradient-to-r from-green-400 to-green-600
-    "></div>
+      bg-gradient-to-r from-green-400 to-green-600"></div>
 
     <!-- Secret Link Display -->
     <div class="flex items-center px-4 py-3">
@@ -19,17 +17,17 @@
         <div class="
           flex items-center gap-2 mb-2
           text-sm text-green-600
-          dark:text-green-400
-        ">
-          <Icon icon="mdi:check-circle" class="w-4 h-4" aria-hidden="true" />
+          dark:text-green-400">
+          <Icon icon="mdi:check-circle"
+                class="w-4 h-4"
+                aria-hidden="true" />
           <span>{{ $t('web.private.secret_created') }}</span>
         </div>
 
-        <textarea
-          ref="linkInput"
-          readonly
-          :value="metadata.share_url"
-          class="
+        <textarea ref="linkInput"
+                  readonly
+                  :value="metadata.share_url"
+                  class="
             w-full
             bg-transparent border-0
             text-gray-900 font-mono text-sm sm:text-base
@@ -37,26 +35,21 @@
             focus:ring-0
             resize-none
           "
-          aria-label="Secret link"
-        />
+                  aria-label="Secret link" />
 
       </div>
 
       <div class="flex-shrink-0 ml-4">
-        <button
-          @click="copyToClipboard"
-          class="inline-flex items-center justify-center p-2 rounded-md
+        <button @click="copyToClipboard"
+                class="inline-flex items-center justify-center p-2 rounded-md
                  text-gray-500 dark:text-gray-400
                  hover:text-gray-700 dark:hover:text-gray-200
                  hover:bg-gray-100 dark:hover:bg-gray-700
                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500
                  transition-colors duration-150"
-          :class="{ 'text-green-500 dark:text-green-400': copied }"
-        >
-          <Icon
-            :icon="copied ? 'material-symbols:check' : 'material-symbols:content-copy-outline'"
-            class="w-5 h-5"
-          />
+                :class="{ 'text-green-500 dark:text-green-400': copied }">
+          <Icon :icon="copied ? 'material-symbols:check' : 'material-symbols:content-copy-outline'"
+                class="w-5 h-5" />
           <span class="sr-only">{{ copied ? 'Copied!' : 'Copy to clipboard' }}</span>
         </button>
       </div>
@@ -65,21 +58,20 @@
     <!-- Security Notice -->
     <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-2 border-t border-gray-200 dark:border-gray-700">
       <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
-        <Icon icon="material-symbols:shield-outline" class="w-4 h-4 mr-2" />
+        <Icon icon="material-symbols:shield-outline"
+              class="w-4 h-4 mr-2" />
         {{ $t('web.private.share_link_securely') }}
       </div>
     </div>
 
     <!-- Copy Feedback Toast -->
-    <div
-      v-if="showToast"
-      class="absolute top-3 right-3 px-3 py-1.5
+    <div v-if="showToast"
+         class="absolute top-3 right-3 px-3 py-1.5
              bg-gray-900 dark:bg-gray-700
              text-white text-sm
              rounded-md shadow-lg
              transform transition-all duration-300"
-      :class="{ 'opacity-0 translate-y-1': !showToast, 'opacity-100 translate-y-0': showToast }"
-    >
+         :class="{ 'opacity-0 translate-y-1': !showToast, 'opacity-100 translate-y-0': showToast }">
       {{ $t('web.COMMON.copied_to_clipboard') }}
     </div>
   </div>

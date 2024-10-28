@@ -1,163 +1,130 @@
 <template>
   <StatusBar :success="success"
-               :error="error"
-               :loading="isSubmitting"
-               :auto-dismiss="true"
-                />
-  <main
-    class="max-w-2xl mx-auto px-4 py-6"
-    role="main"
-    :aria-busy="isLoading"
-  >
+             :error="error"
+             :loading="isSubmitting"
+             :auto-dismiss="true" />
+  <main class="max-w-2xl mx-auto px-4 py-6"
+        role="main"
+        :aria-busy="isLoading">
     <!--<DashboardTabNav />-->
 
     <!-- Loading State -->
-    <div
-      v-if="isLoading"
-      class="flex justify-center py-8"
-      role="status"
-      aria-label="Loading secret details"
-    >
-      <Icon
-        icon="mdi:loading"
-        class="w-8 h-8 text-brand-500 animate-spin"
-        aria-hidden="true"
-      />
+    <div v-if="isLoading"
+         class="flex justify-center py-8"
+         role="status"
+         aria-label="Loading secret details">
+      <Icon icon="mdi:loading"
+            class="w-8 h-8 text-brand-500 animate-spin"
+            aria-hidden="true" />
       <span class="sr-only">{{ $t('web.COMMON.loading') }}</span>
     </div>
 
     <!-- Content State -->
-    <div
-      v-else-if="record && details"
-      class="space-y-8"
-    >
+    <div v-else-if="record && details"
+         class="space-y-8">
       <!-- Secret Link Header -->
-      <header
-        v-if="details.show_secret_link"
-        class="animate-fade-in"
-        aria-labelledby="secret-header"
-      >
-        <h1
-          id="secret-header"
-          class="sr-only"
-        >
+      <header v-if="details.show_secret_link"
+              class="animate-fade-in"
+              aria-labelledby="secret-header">
+        <h1 id="secret-header"
+            class="sr-only">
           {{ $t('web.COMMON.secret_link') }}
         </h1>
-        <SecretLink
-          :metadata="record"
-          :details="details"
-          class="focus-within:ring-2 focus-within:ring-brand-500 rounded-lg"
-        />
+        <SecretLink :metadata="record"
+                    :details="details"
+                    class="focus-within:ring-2 focus-within:ring-brand-500 rounded-lg" />
 
       </header>
 
       <!-- Additional Content Sections -->
-      <section
-        v-if="details.show_secret_link"
-        class="relative sr-only"
-        aria-labelledby="section-secret-link"
-      >
+      <section v-if="details.show_secret_link"
+               class="relative sr-only"
+               aria-labelledby="section-secret-link">
         <h2 id="section-secret-link">
           {{ $t('web.COMMON.secret_link') }}
         </h2>
       </section>
 
       <!-- Secondary: Status & Lifecycle -->
-      <section
-        class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
-        aria-labelledby="section-status"
-      >
+      <section class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
+               aria-labelledby="section-status">
         <div class="flex items-center justify-between mb-2">
-          <h2
-            id="section-status"
-            class="text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+          <h2 id="section-status"
+              class="text-sm font-medium text-gray-700 dark:text-gray-300">
             {{ $t('web.COMMON.secret_status') }}
           </h2>
           <StatusBadge :status="secretStatus" />
         </div>
 
-        <TimelineDisplay
-          :metadata="record"
-          :details="details"
-        />
+        <TimelineDisplay :metadata="record"
+                         :details="details" />
       </section>
 
       <!-- Tertiary: Actions -->
-      <section
-        class="flex flex-col gap-3"
-        aria-labelledby="section-actions"
-      >
-        <h2 id="section-actions" class="sr-only">
+      <section class="flex flex-col gap-3"
+               aria-labelledby="section-actions">
+        <h2 id="section-actions"
+            class="sr-only">
           {{ $t('web.COMMON.actions') }}
         </h2>
 
-        <BurnButtonForm
-          v-if="!details.is_destroyed"
-          :metadata="record"
-          :details="details"
-          class="w-full"
-        />
+        <BurnButtonForm v-if="!details.is_destroyed"
+                        :metadata="record"
+                        :details="details"
+                        class="w-full" />
 
-        <button
-          type="button"
-          @click="handleCreateNew"
-          class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-gray-900"
-        >
+        <button type="button"
+                @click="handleCreateNew"
+                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-gray-900">
           {{ $t('web.COMMON.create_new_secret') }}
         </button>
       </section>
 
       <!-- Help Section -->
       <section aria-labelledby="section-help">
-        <h2 id="section-help" class="sr-only">
+        <h2 id="section-help"
+            class="sr-only">
           {{ $t('web.COMMON.help_section') }}
         </h2>
 
-        <button
-          type="button"
-          @click="toggleHelp"
-          class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 rounded-md p-1"
-        >
-          <Icon
-            icon="mdi:information"
-            class="w-5 h-5"
-            aria-hidden="true"
-          />
+        <button type="button"
+                @click="toggleHelp"
+                class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 rounded-md p-1">
+          <Icon icon="mdi:information"
+                class="w-5 h-5"
+                aria-hidden="true" />
           <span>{{ $t('web.COMMON.need_help') }}</span>
         </button>
 
-        <MetadataFAQ
-          v-if="showHelp"
-          :metadata="record"
-          :details="details"
-          class="animate-fade-in mt-4"
-        />
+        <MetadataFAQ v-if="showHelp"
+                     :metadata="record"
+                     :details="details"
+                     class="animate-fade-in mt-4" />
       </section>
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-import StatusBar from '@/components/StatusBar.vue'
-import BurnButtonForm from '@/components/secrets/metadata/BurnButtonForm.vue'
-import MetadataFAQ from '@/components/secrets/metadata/MetadataFAQ.vue'
-import SecretLink from '@/components/secrets/metadata/SecretLink.vue'
+import StatusBar from '@/components/StatusBar.vue';
+import BurnButtonForm from '@/components/secrets/metadata/BurnButtonForm.vue';
+import MetadataFAQ from '@/components/secrets/metadata/MetadataFAQ.vue';
+import SecretLink from '@/components/secrets/metadata/SecretLink.vue';
 import StatusBadge from '@/components/secrets/metadata/StatusBadge.vue';
-import TimelineDisplay from '@/components/secrets/metadata/TimelineDisplay.vue'
-import { useFetchDataRecord } from '@/composables/useFetchData'
-import type { MetadataData } from '@/types/onetime'
-import { Icon } from '@iconify/vue'
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import TimelineDisplay from '@/components/secrets/metadata/TimelineDisplay.vue';
+import { useFetchDataRecord } from '@/composables/useFetchData';
+import type { MetadataData } from '@/types/onetime';
+import { Icon } from '@iconify/vue';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 interface Props {
-  metadataKey: string
+  metadataKey: string;
 }
 
-const props = defineProps<Props>()
-const router = useRouter()
-const showHelp = ref(false)
+const props = defineProps<Props>();
+const router = useRouter();
+const showHelp = ref(false);
 
 const {
   record,
@@ -168,26 +135,26 @@ const {
   fetchData: fetchMetadata
 } = useFetchDataRecord<MetadataData>({
   url: `/api/v2/private/${props.metadataKey}`,
-})
+});
 
 const secretStatus = computed(() => {
-  if (!details.value) return 'active'
+  if (!details.value) return 'active';
 
-  if (details.value.is_destroyed) return 'destroyed'
-  if (details.value.is_burned) return 'burned'
-  if (details.value.is_received) return 'received'
-  return 'active'
-})
+  if (details.value.is_destroyed) return 'destroyed';
+  if (details.value.is_burned) return 'burned';
+  if (details.value.is_received) return 'received';
+  return 'active';
+});
 
 const toggleHelp = () => {
-  showHelp.value = !showHelp.value
-}
+  showHelp.value = !showHelp.value;
+};
 
 const handleCreateNew = () => {
-  router.push('/')
-}
+  router.push('/');
+};
 
-onMounted(fetchMetadata)
+onMounted(fetchMetadata);
 </script>
 
 <style scoped>
@@ -200,6 +167,7 @@ onMounted(fetchMetadata)
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
