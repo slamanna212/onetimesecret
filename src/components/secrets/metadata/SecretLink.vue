@@ -5,23 +5,30 @@
     bg-white
     dark:bg-gray-800 dark:border-gray-700
     border-gray-200">
-    <!-- Success Indicator (Subtle) -->
-    <div class="
-      absolute top-0 left-0
-      w-full h-1
-      bg-gradient-to-r from-green-400 to-green-600"></div>
+    <!-- Enhanced Security Indicator -->
+    <div class="absolute top-0 left-0 w-full h-1.5 flex">
+      <div class="flex-1 bg-green-500"></div>
+      <div v-if="details.has_passphrase" class="flex-1 bg-amber-500"></div>
+      <div v-if="details.has_maxviews" class="flex-1 bg-blue-500"></div>
+    </div>
 
     <!-- Secret Link Display -->
     <div class="flex items-center px-4 py-3">
       <div class="flex-grow min-w-0">
-        <div class="
-          flex items-center gap-2 mb-2
-          text-sm text-green-600
-          dark:text-green-400">
-          <Icon icon="mdi:check-circle"
-                class="w-4 h-4"
-                aria-hidden="true" />
-          <span>{{ $t('web.private.secret_created') }}</span>
+        <!-- Enhanced Status Display -->
+        <div class="flex items-center gap-3 mb-2">
+          <div class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+            <Icon icon="mdi:check-circle"
+                  class="w-4 h-4"
+                  aria-hidden="true" />
+            <span>{{ $t('web.private.secret_created') }}</span>
+          </div>
+          <div class="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400">
+            <Icon icon="mdi:shield-lock-outline"
+                  class="w-4 h-4"
+                  aria-hidden="true" />
+            <span>{{ $t('web.COMMON.encrypted') }}</span>
+          </div>
         </div>
 
         <textarea ref="linkInput"
@@ -36,10 +43,19 @@
             resize-none
           "
                   aria-label="Secret link" />
-
       </div>
 
-      <div class="flex-shrink-0 ml-4">
+      <div class="flex items-center gap-2">
+        <!-- Encryption Status Icon -->
+        <div class="flex-shrink-0">
+          <div class="p-1.5 rounded-full bg-blue-100 dark:bg-blue-900">
+            <Icon icon="mdi:lock-check"
+                  class="w-4 h-4 text-blue-600 dark:text-blue-400"
+                  aria-hidden="true" />
+          </div>
+        </div>
+
+        <!-- Copy Button -->
         <button @click="copyToClipboard"
                 class="inline-flex items-center justify-center p-2 rounded-md
                  text-gray-500 dark:text-gray-400
@@ -55,12 +71,33 @@
       </div>
     </div>
 
-    <!-- Security Notice -->
-    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-2 border-t border-gray-200 dark:border-gray-700">
-      <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
-        <Icon icon="material-symbols:shield-outline"
-              class="w-4 h-4 mr-2" />
-        {{ $t('web.private.share_link_securely') }}
+    <!-- Enhanced Security Notice -->
+    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+      <div class="space-y-2">
+        <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
+          <Icon icon="material-symbols:shield"
+                class="w-5 h-5 mr-2 text-brand-500" />
+          <span class="font-medium">{{ $t('web.private.enhanced_security') }}</span>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 pl-7">
+          <ul class="space-y-1">
+            <li class="flex items-center gap-1">
+              <Icon icon="mdi:lock-check"
+                    class="w-3.5 h-3.5 text-green-500" />
+              {{ $t('web.COMMON.encrypted_in_transit') }}
+            </li>
+            <li v-if="details.has_passphrase" class="flex items-center gap-1">
+              <Icon icon="mdi:key"
+                    class="w-3.5 h-3.5 text-amber-500" />
+              {{ $t('web.COMMON.passphrase_protected') }}
+            </li>
+            <li v-if="details.has_maxviews" class="flex items-center gap-1">
+              <Icon icon="mdi:eye-check"
+                    class="w-3.5 h-3.5 text-blue-500" />
+              {{ $t('web.COMMON.limited_views', { count: details.maxviews }) }}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -76,7 +113,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup lang="ts">
 import type { MetadataData, MetadataDetails } from '@/types/onetime';

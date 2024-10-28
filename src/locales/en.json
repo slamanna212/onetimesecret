@@ -84,7 +84,33 @@
       "word_cancel": "Cancel",
       "feedback_text": "Share your thoughts, ideas, or experiences...",
       "button_send_feedback": "Send Feedback",
-      "verification_sent_to": "A verification was sent to"
+      "verification_sent_to": "A verification was sent to",
+      "encrypted": "Encrypted",
+      "encrypted_in_transit": "Encrypted in transit",
+      "passphrase_protected": "Protected with passphrase",
+      "limited_views": "{count} view limit",
+      "views": "Views",
+      "times_viewed": "times viewed",
+      "view_progress": "View Progress",
+      "burn_this_secret_aria": "Burn this secret permanently",
+      "burn_confirmation_title": "Burn Secret Confirmation",
+      "burn_confirmation_message": "Are you sure you want to burn this secret? This action cannot be undone.",
+      "confirm_burn": "Yes, burn this secret",
+      "burn_security_notice": "For security, burning a secret will permanently delete it and prevent anyone from accessing it."
+    },
+    "STATUS": {
+      "active": "Active",
+      "received": "Received",
+      "burned": "Burned",
+      "destroyed": "Destroyed",
+      "expiring_soon": "Expiring Soon",
+      "processing": "Processing",
+      "active_description": "Secret is active and ready to be viewed",
+      "received_description": "Secret has been viewed by the recipient",
+      "burned_description": "Secret was manually burned before being viewed",
+      "destroyed_description": "Secret has been permanently destroyed",
+      "expiring_soon_description": "Secret will expire soon",
+      "processing_description": "Secret is being processed"
     },
     "UNITS": {
       "ttl": {
@@ -127,7 +153,8 @@
       "secret_created": "Your secret has been created securely",
       "share_link_securely": "Share this link through a separate, secure channel",
       "copy_link": "Copy secret link",
-      "link_copied": "Link copied to clipboard"
+      "link_copied": "Link copied to clipboard",
+      "enhanced_security": "Enhanced Security Features"
     },
     "shared": {
       "requires_passphrase": "This message requires a passphrase:",
