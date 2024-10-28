@@ -10,7 +10,7 @@ import type Stripe from 'stripe';
 // Base interface for common properties
 export interface BaseApiRecord {
   identifier: string;
-  created: string;
+  created: string | number;
   updated: string;
 }
 
@@ -42,7 +42,6 @@ export interface Customer extends BaseApiRecord {
   stripe_subscription_id?: string;
   stripe_customer_id?: string;
 }
-
 
 export interface ColonelCustomer {
   custid: string;
@@ -189,7 +188,6 @@ export interface MetadataData extends BaseApiRecord {
   secret_key: string;
   secret_shortkey: string;
   recipients: string[];
-  created?: number;
   created_date?: string;
   created_date_utc: string;
   expiration?: number;
@@ -263,11 +261,11 @@ export interface ConcealData {
 export interface ConcealDetails {
   kind: string,
   recipient: string,
-  recipient_safe: string
+  recipient_safe: string;
 }
 
 export interface CheckAuthData extends Customer {
-  last_login?: number
+  last_login?: number;
 }
 
 export interface CheckAuthDetails {
@@ -307,7 +305,7 @@ export class Region extends BaseEntity {
 // Note: "Regions" is not a list of Region objects. It represents the site settings for all regions. A better name would be RegionsConfig.
 export interface Regions {
   enabled: boolean;
-  current_jurisdiction: str
+  current_jurisdiction: str;
   jurisdictions: Jurisdiction[];
 }
 
