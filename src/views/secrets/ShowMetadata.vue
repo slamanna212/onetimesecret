@@ -1,12 +1,15 @@
 <template>
+  <StatusBar :success="success"
+               :error="error"
+               :loading="isSubmitting"
+               :auto-dismiss="true"
+                />
   <main
     class="max-w-2xl mx-auto px-4 py-6"
     role="main"
-    aria-busy="isLoading"
+    :aria-busy="isLoading"
   >
     <!--<DashboardTabNav />-->
-
-    <BasicFormAlerts :error="error" />
 
     <!-- Loading State -->
     <div
@@ -28,36 +31,35 @@
       v-else-if="record && details"
       class="space-y-8"
     >
-      <!-- Success confirmation -->
-      <header class="text-center animate-fade-in">
-        <div
-          class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 mb-4"
-          aria-hidden="true"
-        >
-          <Icon
-            icon="mdi:check"
-            class="w-6 h-6 text-green-600 dark:text-green-400"
-          />
-        </div>
-        <h1 class="text-xl font-medium text-gray-900 dark:text-gray-100">
-          {{ $t('web.private.secret_created') }}
-        </h1>
-      </header>
-
-      <!-- Primary: Secret Link -->
-      <section
+      <!-- Secret Link Header -->
+      <header
         v-if="details.show_secret_link"
-        class="relative"
-        aria-labelledby="section-secret-link"
+        class="animate-fade-in"
+        aria-labelledby="secret-header"
       >
-        <h2 id="section-secret-link" class="sr-only">
+        <h1
+          id="secret-header"
+          class="sr-only"
+        >
           {{ $t('web.COMMON.secret_link') }}
-        </h2>
+        </h1>
         <SecretLink
           :metadata="record"
           :details="details"
           class="focus-within:ring-2 focus-within:ring-brand-500 rounded-lg"
         />
+
+      </header>
+
+      <!-- Additional Content Sections -->
+      <section
+        v-if="details.show_secret_link"
+        class="relative sr-only"
+        aria-labelledby="section-secret-link"
+      >
+        <h2 id="section-secret-link">
+          {{ $t('web.COMMON.secret_link') }}
+        </h2>
       </section>
 
       <!-- Secondary: Status & Lifecycle -->
@@ -137,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import BasicFormAlerts from '@/components/BasicFormAlerts.vue'
+import StatusBar from '@/components/StatusBar.vue'
 import BurnButtonForm from '@/components/secrets/metadata/BurnButtonForm.vue'
 import MetadataFAQ from '@/components/secrets/metadata/MetadataFAQ.vue'
 import SecretLink from '@/components/secrets/metadata/SecretLink.vue'
@@ -161,6 +163,7 @@ const {
   record,
   details,
   isLoading,
+  success,
   error,
   fetchData: fetchMetadata
 } = useFetchDataRecord<MetadataData>({

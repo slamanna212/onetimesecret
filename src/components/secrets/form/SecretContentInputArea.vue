@@ -60,7 +60,7 @@
               @input="checkContentLength"
               :maxlength="maxLength"
               class="w-full min-h-[6rem] max-h-[400px] p-4 font-mono text-base leading-[1.2] tracking-wide
-            border-gray-300 rounded-md shadow-sm
+            border-1 border-brandcomp-400 rounded-md shadow-sm
             focus:ring-brandcomp-500 focus:border-brandcomp-500
             bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white
             placeholder-gray-400 dark:placeholder-gray-500
