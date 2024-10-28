@@ -3,9 +3,9 @@ name: Docker Build and Publish
 #
 # Docker image tagging strategy:
 #
-# Release tags (v1.0.0):        {version}, latest
-# Release candidates (v1.0.0-rc1): {version}, next
-# Branches (feature/x):         {branch-name}
+# Release tags (v1.0.0):            {version}, latest
+# Release candidates (v1.0.0-rc1):  {version}, next
+# Branches (feature/x):             {branch-name}
 #
 # This ensures stable releases are tagged as 'latest' while release candidates
 # are tagged as 'next' for early testing. Branch builds get descriptive tags.

@@ -189,7 +189,10 @@ export interface MetadataData extends BaseApiRecord {
   secret_key: string;
   secret_shortkey: string;
   recipients: string[];
+  created?: number;
+  created_date?: string;
   created_date_utc: string;
+  expiration?: number;
   expiration_stamp: string;
   share_path: string;
   burn_path: string;
@@ -204,6 +207,7 @@ export interface MetadataDetails extends DetailsType {
   body_class: string;
   burned_date_utc: string;
   burned_date: string;
+  burned?: number;
   can_decrypt: boolean;
   display_feedback: boolean;
   display_lines: number;
@@ -216,6 +220,7 @@ export interface MetadataDetails extends DetailsType {
   no_cache: boolean;
   received_date_utc: string;
   received_date: string;
+  received?: number;
   secret_value: string;
   show_metadata_link: boolean;
   show_metadata: boolean;

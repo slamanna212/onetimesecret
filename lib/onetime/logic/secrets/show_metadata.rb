@@ -14,7 +14,8 @@ module Onetime::Logic
             :burned_date_utc, :maxviews, :has_maxviews, :view_count,
             :has_passphrase, :can_decrypt, :secret_value, :is_truncated,
             :show_secret, :show_secret_link, :show_metadata_link, :show_metadata,
-            :show_recipients, :share_domain
+            :show_recipients, :share_domain,
+            :expiration, :received, :burned, :created, :created_date
       attr_reader :share_path, :burn_path, :metadata_path, :share_url,
             :metadata_url, :burn_url, :display_lines
 
@@ -51,8 +52,11 @@ module Onetime::Logic
         # Prior to the change they had the same value so we can
         # default to using the metadata ttl.
         ttl = (metadata.secret_ttl || metadata.ttl).to_i
+        @created = metadata.created.to_i
+        @created_date = natural_time(metadata.created.to_i || 0)
         @created_date_utc = epochformat(metadata.created.to_i)
 
+        @expiration = ttl
         @expiration_stamp = if ttl <= 1.minute
           '%d seconds' % ttl
         elsif ttl <= 1.hour
@@ -69,8 +73,10 @@ module Onetime::Logic
           @is_received = metadata.state?(:received)
           @is_burned = metadata.state?(:burned)
           @is_destroyed = @is_burned || @is_received
+          @received = metadata.received.to_i
           @received_date = natural_time(metadata.received.to_i || 0)
           @received_date_utc = epochformat(metadata.received.to_i || 0)
+          @burned = metadata.burned.to_i
           @burned_date = natural_time(metadata.burned.to_i || 0)
           @burned_date_utc = epochformat(metadata.burned.to_i || 0)
         else
@@ -173,7 +179,10 @@ module Onetime::Logic
           secret_key: @secret_key,
           secret_shortkey: @secret_shortkey,
           recipients: @recipients,
+          created: @created,
+          created_date: @created_date,
           created_date_utc: @created_date_utc,
+          expiration: @expiration,
           expiration_stamp: @expiration_stamp,
           share_path: @share_path,
           burn_path: @burn_path,
@@ -195,8 +204,10 @@ module Onetime::Logic
           is_received: @is_received,
           is_burned: @is_burned,
           is_destroyed: @is_destroyed,
+          received: @received,
           received_date: @received_date,
           received_date_utc: @received_date_utc,
+          burned: @burned,
           burned_date: @burned_date,
           burned_date_utc: @burned_date_utc,
           maxviews: @maxviews,
