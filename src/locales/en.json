@@ -15,6 +15,24 @@
 
       "header_settings": "Settings",
       "submit_with": "Submit",
+      "secret_created": "Secret Successfully Created",
+      "secret_status": "Secret Status",
+      "copied_to_clipboard": "Copied to clipboard",
+      "share_link_securely": "Share this link securely via a separate channel",
+      "create_new_secret": "Create New Secret",
+      "need_help": "Need help?",
+      "created": "Created",
+      "expires": "Expires",
+      "status": {
+        "active": "Active",
+        "received": "Received",
+        "burned": "Burned",
+        "destroyed": "Destroyed"
+      },
+      "view_toggle": {
+        "show": "Show",
+        "hide": "Hide"
+      },
 
       "description": "Keep sensitive information out of your chat logs and email. Share a secret link that is available only one time.",
       "keywords": "secret,password generator,share a secret,onetime",
@@ -105,7 +123,11 @@
       "pretext": "Share this link:",
       "requires_passphrase": "Requires a passphrase.",
       "this_msg_is_encrypted": "This message is encrypted with your passphrase.",
-      "only_see_once": "you will only see this once"
+      "only_see_once": "you will only see this once",
+      "secret_created": "Your secret has been created securely",
+      "share_link_securely": "Share this link through a separate, secure channel",
+      "copy_link": "Copy secret link",
+      "link_copied": "Link copied to clipboard"
     },
     "shared": {
       "requires_passphrase": "This message requires a passphrase:",
