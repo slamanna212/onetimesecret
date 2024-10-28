@@ -38,42 +38,62 @@
         </p>
       </div>
 
-      <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <!-- Confirm Burn -->
-        <router-link :to="{ name: 'Burn secret', params: { metadataKey: metadata.key } }"
-                     class="
-                       inline-flex items-center justify-center gap-2
-                       px-4 py-2
-                       text-sm font-medium text-white
-                       bg-red-600 hover:bg-red-700
-                       rounded-md
-                       transition-colors duration-200
-                       focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                       dark:focus:ring-offset-gray-800
-                     ">
-          <Icon icon="heroicons:fire-20-solid"
-                class="w-5 h-5"
-                aria-hidden="true" />
-          {{ $t('web.COMMON.confirm_burn') }}
-        </router-link>
+      <form @submit.prevent="burnSecret" class="space-y-4">
+        <input type="hidden" name="shrimp" :value="csrfStore.shrimp" />
+        <input type="hidden" name="continue" value="true" />
 
-        <!-- Cancel Button -->
-        <button @click="showConfirmation = false"
-                class="
-                  inline-flex items-center justify-center
-                  px-4 py-2
-                  text-sm font-medium text-gray-700
-                  bg-white hover:bg-gray-50
-                  border border-gray-300
-                  rounded-md
-                  transition-colors duration-200
-                  focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2
-                  dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600
-                  dark:hover:bg-gray-600 dark:focus:ring-offset-gray-800
-                ">
-          {{ $t('web.COMMON.cancel') }}
-        </button>
-      </div>
+        <div v-if="details.has_passphrase">
+          <input type="password"
+                 v-model="passphrase"
+                 name="passphrase"
+                 id="passField"
+                 class="w-full px-3 py-2 border rounded-md
+                 border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200
+                 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                 :placeholder="$t('web.private.enter_passphrase')" />
+        </div>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <!-- Confirm Burn -->
+          <button type="submit"
+                  :disabled="isSubmitting"
+                  class="
+                    inline-flex items-center justify-center gap-2
+                    px-4 py-2
+                    text-sm font-medium text-white
+                    bg-red-600 hover:bg-red-700
+                    rounded-md
+                    transition-colors duration-200
+                    focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+                    dark:focus:ring-offset-gray-800
+                  ">
+            <Icon icon="heroicons:fire-20-solid"
+                  class="w-5 h-5"
+                  aria-hidden="true" />
+            {{ $t('web.COMMON.confirm_burn') }}
+          </button>
+
+          <!-- Cancel Button -->
+          <button @click="showConfirmation = false"
+                  type="button"
+                  class="
+                    inline-flex items-center justify-center
+                    px-4 py-2
+                    text-sm font-medium text-gray-700
+                    bg-white hover:bg-gray-50
+                    border border-gray-300
+                    rounded-md
+                    transition-colors duration-200
+                    focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2
+                    dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600
+                    dark:hover:bg-gray-600 dark:focus:ring-offset-gray-800
+                  ">
+            {{ $t('web.COMMON.cancel') }}
+          </button>
+        </div>
+      </form>
+
+      <StatusBar :success="success" :error="error" class="mt-4" />
     </div>
 
     <!-- Security Notice -->
@@ -99,18 +119,53 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { MetadataData, MetadataDetails } from '@/types/onetime';
+import type { MetadataData, MetadataDetails, MetadataDataApiResponse } from '@/types/onetime';
 import { Icon } from '@iconify/vue';
+import { useCsrfStore } from '@/stores/csrfStore';
+import { useFormSubmission } from '@/composables/useFormSubmission';
+import StatusBar from '@/components/StatusBar.vue';
 
 interface Props {
   metadata: MetadataData;
   details: MetadataDetails;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+const emit = defineEmits(['secretBurned']);
 
+const csrfStore = useCsrfStore();
 const showConfirmation = ref(false);
 const isHovered = ref(false);
+const passphrase = ref('');
+
+const {
+  isSubmitting,
+  error,
+  success,
+  submitForm
+} = useFormSubmission({
+  url: `/api/v2/private/${props.metadata.key}/burn`,
+  successMessage: '',
+  getFormData: () => {
+    const formData = new FormData();
+    formData.append('shrimp', csrfStore.shrimp);
+    formData.append('continue', 'true');
+    if (props.details.has_passphrase) {
+      formData.append('passphrase', passphrase.value);
+    }
+    return formData;
+  },
+  onSuccess: (data: MetadataDataApiResponse) => {
+    emit('secretBurned', data.record);
+  },
+  onError: (data) => {
+    console.error('Error burning secret:', data);
+  },
+});
+
+const burnSecret = async () => {
+  await submitForm();
+};
 
 // Add hover effect for the burn icon
 const startBounce = () => {
