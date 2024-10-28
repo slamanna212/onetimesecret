@@ -7,7 +7,7 @@
       </div>
       <div class="mt-4 sm:mt-0">
         <router-link to="/account/domains/add"
-          class="inline-flex items-center rounded-md px-3 py-2 text-sm font-brand font-semibold text-white
+                     class="inline-flex items-center rounded-md px-3 py-2 text-sm font-brand font-semibold text-white
           shadow-sm bg-brand-600 hover:bg-brand-500 focus-visible:outline focus-visible:outline-2
           focus-visible:outline-offset-2 focus-visible:outline-brand-600 dark:bg-brand-500
           dark:hover:bg-brand-400 transition-colors duration-200">
@@ -27,19 +27,19 @@
               <thead class="bg-gray-50 dark:bg-gray-800">
                 <tr>
                   <th scope="col"
-                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900
+                      class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900
                     dark:text-gray-200 sm:pl-6">
                     Domain</th>
                   <th scope="col"
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900
+                      class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900
                     dark:text-gray-200 table-cell">
                     Status</th>
                   <th scope="col"
-                    class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900
+                      class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900
                     dark:text-gray-200 sm:table-cell">
                     Added</th>
                   <th scope="col"
-                    class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                      class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                     <span class="sr-only">Actions</span>
                   </th>
                 </tr>
@@ -49,9 +49,9 @@
                     :key="domain.identifier"
                     :class="domainIdx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'"
                     tabindex="0">
-                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-extrabold sm:pl-6">
+                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-lg font-brand font-extrabold sm:pl-6">
                     <router-link :to="{ name: 'AccountDomainBrand', params: { domain: domain.display_domain } }"
-                      class="text-brandcomp-600 hover:text-brandcomp-500 dark:text-brandcomp-400
+                                 class="text-brandcomp-600 hover:text-brandcomp-500 dark:text-brandcomp-400
                       dark:hover:text-brandcomp-300 transition-colors duration-200">
                       {{ domain.display_domain }}
                     </router-link>
