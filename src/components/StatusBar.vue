@@ -1,57 +1,45 @@
-
 <template>
   <Teleport to="body">
-    <TransitionRoot
-      :show="isVisible || loading"
-      appear
-      enter="transition-all duration-200 ease-out"
-      enter-from="transform translate-y-full opacity-0"
-      enter-to="transform translate-y-0 opacity-100"
-      leave="transition-all duration-150 ease-in"
-      leave-from="transform translate-y-0 opacity-100"
-      leave-to="transform translate-y-full opacity-0"
-    >
-      <div
-        class="fixed bottom-0 left-0 right-0 flex items-center justify-between px-4 py-3 shadow-lg transition-colors duration-200"
-        :class="preloadStatus?.classes"
-        role="status"
-        aria-live="polite"
-      >
+    <TransitionRoot :show="isVisible || loading"
+                    appear
+                    enter="transition-all duration-200 ease-out"
+                    enter-from="transform translate-y-full opacity-0"
+                    enter-to="transform translate-y-0 opacity-100"
+                    leave="transition-all duration-150 ease-in"
+                    leave-from="transform translate-y-0 opacity-100"
+                    leave-to="transform translate-y-full opacity-0">
+      <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between px-4 py-3 shadow-lg transition-colors duration-200"
+           :class="preloadStatus?.classes"
+           role="status"
+           aria-live="polite">
         <div class="flex items-center space-x-3">
-          <Icon
-            :icon="preloadStatus?.icon || 'mdi:information'"
-            class="h-5 w-5 transition-all duration-200"
-            :class="preloadStatus?.iconClasses"
-            aria-hidden="true"
-          />
-          <span
-            class="text-sm font-medium transition-all duration-200"
-            :class="preloadStatus?.textClasses"
-          >
+          <Icon :icon="preloadStatus?.icon || 'mdi:information'"
+                class="h-5 w-5 transition-all duration-200"
+                :class="preloadStatus?.iconClasses"
+                aria-hidden="true" />
+          <span class="text-sm font-medium transition-all duration-200"
+                :class="preloadStatus?.textClasses">
             {{ message }}
           </span>
         </div>
 
         <div class="flex items-center">
-          <button
-            v-if="!loading"
-            type="button"
-            class="ml-4 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-            @click="handleDismiss"
-          >
+          <button v-if="!loading"
+                  type="button"
+                  class="ml-4 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                  @click="handleDismiss">
             <span class="sr-only">Dismiss</span>
-            <Icon icon="mdi:close" class="h-5 w-5" />
+            <Icon icon="mdi:close"
+                  class="h-5 w-5" />
           </button>
         </div>
 
         <!-- Progress indicator only shows after loading is complete -->
-        <div
-          v-if="autoDismiss && !loading && (success || error)"
-          class="absolute bottom-0 left-0 h-1 bg-current opacity-30"
-          :style="{
-            animation: `shrink ${duration}ms linear forwards`
-          }"
-        />
+        <div v-if="autoDismiss && !loading && (success || error)"
+             class="absolute bottom-0 left-0 h-1 bg-current opacity-30"
+             :style="{
+              animation: `shrink ${duration}ms linear forwards`
+            }" />
       </div>
     </TransitionRoot>
   </Teleport>
