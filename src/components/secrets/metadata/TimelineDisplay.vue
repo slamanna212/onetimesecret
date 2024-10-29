@@ -31,46 +31,6 @@
         </div>
       </div>
 
-      <!-- View Count (if applicable) -->
-      <div v-if="details.view_count > 0" class="group flex gap-4">
-        <div class="
-          flex-shrink-0 w-12 h-12
-          flex items-center justify-center
-          rounded-full
-          bg-blue-100 dark:bg-blue-900
-          transition-transform duration-200
-          group-hover:scale-110">
-          <Icon
-            icon="material-symbols:visibility-outline"
-            class="w-6 h-6 text-blue-600 dark:text-blue-400"
-            aria-hidden="true"
-          />
-        </div>
-        <div class="flex-grow group-hover:translate-x-1 transition-transform duration-200">
-          <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-            {{ $t('web.COMMON.views') }}
-          </p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ details.view_count }} {{ $t('web.COMMON.times_viewed') }}
-          </p>
-          <div v-if="details.has_maxviews" class="mt-1">
-            <div class="flex items-center justify-between text-xs mb-1">
-              <span class="text-gray-500 dark:text-gray-400">
-                {{ $t('web.COMMON.view_progress') }}
-              </span>
-              <span class="text-gray-600 dark:text-gray-300 font-medium">
-                {{ details.view_count }}/{{ details.maxviews }}
-              </span>
-            </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-              <div class="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-                   :style="{ width: `${(details.view_count / details.maxviews) * 100}%` }"
-                   :title="`${Math.round((details.view_count / details.maxviews) * 100)}%`" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Received (if applicable) -->
       <div v-if="details.is_received" class="group flex gap-4">
         <div class="
@@ -152,17 +112,7 @@
                 class="text-sm text-gray-500 dark:text-gray-400">
             {{ metadata.expiration_stamp }}
           </time>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-            {{ timeRemaining }}
-          </p>
-          <!-- Expiration Progress Bar -->
-          <div class="mt-1">
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-              <div class="bg-red-500 h-1.5 rounded-full transition-all duration-300"
-                   :style="{ width: `${expirationProgress}%` }"
-                   :title="`${expirationProgress}% elapsed`" />
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

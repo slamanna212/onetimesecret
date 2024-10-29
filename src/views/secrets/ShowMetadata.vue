@@ -44,80 +44,9 @@
                     class="focus-within:ring-2 focus-within:ring-brand-500 rounded-lg" />
       </header>
 
-      <!-- Security Details Section -->
-      <section class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-4"
-               aria-labelledby="section-security">
-        <h2 id="section-security"
-            class="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {{ t('web.COMMON.security_details') }}
-        </h2>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Encryption Status -->
-          <div class="flex items-center gap-2">
-            <Icon icon="mdi:shield-lock"
-                  class="w-5 h-5 text-green-500"
-                  aria-hidden="true" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              {{ t('web.COMMON.encrypted_in_transit') }}
-            </span>
-          </div>
-
-          <!-- Passphrase Protection -->
-          <div class="flex items-center gap-2">
-            <Icon :icon="details.has_passphrase ? 'mdi:lock' : 'mdi:lock-open'"
-                  :class="[
-                    'w-5 h-5',
-                    details.has_passphrase ? 'text-amber-500' : 'text-gray-400'
-                  ]"
-                  aria-hidden="true" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              {{ details.has_passphrase
-                ? t('web.COMMON.passphrase_protected')
-                : t('web.COMMON.no_passphrase') }}
-            </span>
-          </div>
-
-          <!-- View Limit -->
-          <div class="flex items-center gap-2">
-            <Icon icon="mdi:eye"
-                  class="w-5 h-5 text-blue-500"
-                  aria-hidden="true" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              {{ details.has_maxviews
-                ? t('web.COMMON.limited_views', { count: details.maxviews })
-                : t('web.COMMON.unlimited_views') }}
-            </span>
-          </div>
-
-          <!-- Recipients -->
-          <div v-if="record.recipients?.length > 0"
-               class="flex items-center gap-2">
-            <Icon icon="mdi:account-multiple"
-                  class="w-5 h-5 text-purple-500"
-                  aria-hidden="true" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              {{ t('web.COMMON.recipients_count', { count: record.recipients.length }) }}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Status & Timeline -->
+      <!-- Expiration Countdown -->
       <section class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
-               aria-labelledby="section-status">
-        <div class="flex items-center justify-between mb-2">
-          <h2 id="section-status"
-              class="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {{ t('web.COMMON.secret_status') }}
-          </h2>
-          <StatusBadge :status="secretStatus" />
-        </div>
-
-        <TimelineDisplay :metadata="record"
-                         :details="details" />
-
-        <!-- Expiration Countdown -->
+        aria-labelledby="section-expiration">
         <div v-if="!details.is_destroyed && !details.is_burned"
              class="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
           <div class="flex items-center justify-between">
@@ -137,6 +66,21 @@
                  aria-valuemax="100" />
           </div>
         </div>
+      </section>
+
+      <!-- Status & Timeline -->
+      <section class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
+               aria-labelledby="section-status">
+        <div class="flex items-center justify-between mb-2">
+          <h2 id="section-status"
+              class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ t('web.COMMON.timeline_title') }}
+          </h2>
+          <StatusBadge :status="secretStatus" />
+        </div>
+
+        <TimelineDisplay :metadata="record"
+                         :details="details" />
       </section>
 
       <!-- Sharing Instructions -->
