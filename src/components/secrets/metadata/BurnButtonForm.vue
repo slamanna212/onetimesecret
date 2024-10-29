@@ -94,7 +94,11 @@
       </form>
 
       <div class="mt-4" >
-        <StatusBar :success="success" :error="error" />
+        <StatusBar
+          :success="success"
+          :error="error"
+          :loading="isSubmitting"
+        />
       </div>
     </div>
 
@@ -133,7 +137,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['secretBurned']);
+const emit = defineEmits(['secretBurned', 'updateDetails']);
 
 const csrfStore = useCsrfStore();
 const showConfirmation = ref(false);
@@ -158,6 +162,8 @@ const {
     return formData;
   },
   onSuccess: (data: MetadataDataApiResponse) => {
+    // Update the details to reflect the burned state
+    emit('updateDetails', { ...props.details, is_destroyed: true });
     emit('secretBurned', data.record);
   },
   onError: (data) => {
@@ -167,6 +173,10 @@ const {
 
 const burnSecret = async () => {
   await submitForm();
+  if (!error.value) {
+    // Hide confirmation dialog after successful burn
+    showConfirmation.value = false;
+  }
 };
 
 // Add hover effect for the burn icon

@@ -26,7 +26,7 @@
           </p>
           <time :datetime="metadata.created_date_utc"
                 class="text-sm text-gray-500 dark:text-gray-400">
-            {{ formatDateTime(metadata.created_date_utc) }}
+            {{ metadata.created_date_utc }}
           </time>
         </div>
       </div>
@@ -92,7 +92,7 @@
           </p>
           <time :datetime="details.received_date_utc"
                 class="text-sm text-gray-500 dark:text-gray-400">
-            {{ formatDateTime(details.received_date_utc) }}
+            {{ details.received_date_utc }}
           </time>
           <p v-if="receivedTimeAgo" class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
             {{ receivedTimeAgo }}
@@ -121,7 +121,7 @@
           </p>
           <time :datetime="details.burned_date_utc"
                 class="text-sm text-gray-500 dark:text-gray-400">
-            {{ formatDateTime(details.burned_date_utc) }}
+            {{ details.burned_date_utc }}
           </time>
           <p v-if="burnedTimeAgo" class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
             {{ burnedTimeAgo }}
@@ -148,7 +148,7 @@
           <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
             {{ $t('web.COMMON.expires') }}
           </p>
-          <time :datetime="expirationDate"
+          <time :datetime="metadata.expiration_stamp"
                 class="text-sm text-gray-500 dark:text-gray-400">
             {{ metadata.expiration_stamp }}
           </time>
@@ -181,19 +181,6 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Format date and time with detailed information
-const formatDateTime = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return new Intl.DateTimeFormat('default', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  }).format(date);
-};
-
 // Calculate time ago for events
 const calculateTimeAgo = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -218,12 +205,6 @@ const receivedTimeAgo = computed(() => {
 const burnedTimeAgo = computed(() => {
   if (!props.details.burned_date_utc) return '';
   return calculateTimeAgo(props.details.burned_date_utc);
-});
-
-// Expiration calculations
-const expirationDate = computed(() => {
-  const created = new Date(props.metadata.created_date_utc);
-  return new Date(created.getTime() + (props.metadata.expiration || 0) * 1000).toISOString();
 });
 
 const timeRemaining = ref('');

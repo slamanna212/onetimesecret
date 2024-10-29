@@ -178,10 +178,10 @@
           {{ t('web.COMMON.actions') }}
         </h2>
 
-        <BurnButtonForm v-if="!details.is_destroyed"
-                        :metadata="record"
+        <BurnButtonForm :metadata="record"
                         :details="details"
-                        class="w-full" />
+                        @secret-burned="handleSecretBurned"
+                        @update-details="newDetails => details = newDetails" />
 
         <button type="button"
                 @click="handleCreateNew"
@@ -245,7 +245,8 @@ const {
   isLoading,
   success,
   error,
-  fetchData: fetchMetadata
+  fetchData: fetchMetadata,
+  updateRecord
 } = useFetchDataRecord<MetadataData>({
   url: `/api/v2/private/${props.metadataKey}`,
 });
@@ -293,6 +294,17 @@ const updateTimeRemaining = () => {
     timeRemaining.value = t('web.COMMON.hours_remaining', { count: hours });
   } else {
     timeRemaining.value = t('web.COMMON.minutes_remaining', { count: minutes });
+  }
+};
+
+const handleSecretBurned = (updatedRecord: MetadataData) => {
+  // Use updateRecord instead of trying to modify record directly
+  updateRecord(updatedRecord);
+  if (details.value) {
+    details.value = {
+      ...details.value,
+      is_burned: true
+    };
   }
 };
 

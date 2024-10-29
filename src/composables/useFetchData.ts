@@ -22,7 +22,7 @@ interface FetchDataOptions<T extends BaseApiRecord> {
 
 export function useFetchData<T extends BaseApiRecord>({ url, onSuccess, onError }: FetchDataOptions<T>) {
   const records = ref<T[]>([]) as Ref<T[]>;
-  const details = ref<DetailsType>(null);
+  const details = ref<DetailsType | null>(null) as Ref<DetailsType | null>;
   const isLoading = ref(false);
   const error = ref('');
   const success = ref('');
@@ -70,7 +70,7 @@ export function useFetchData<T extends BaseApiRecord>({ url, onSuccess, onError 
       success.value = 'Success';
 
       if (onSuccess) {
-        onSuccess(records.value, details.value);
+        onSuccess(records.value, details.value || undefined);
       }
 
     } catch (err: unknown) {
@@ -104,9 +104,23 @@ export function useFetchData<T extends BaseApiRecord>({ url, onSuccess, onError 
 }
 
 export function useFetchDataRecord<T extends BaseApiRecord>(options: FetchDataOptions<T>) {
-  const { records, details, isLoading, error, success, count, custid, status, fetchData } = useFetchData<T>(options);
+  const {
+    records,
+    details,
+    isLoading,
+    error,
+    success,
+    count,
+    custid,
+    status,
+    fetchData
+  } = useFetchData<T>(options);
 
   const record = computed(() => records.value[0] || null);
+  // Add update method
+  const updateRecord = (newRecord: T) => {
+    records.value = [newRecord];
+  };
 
   return {
     record,
@@ -118,5 +132,6 @@ export function useFetchDataRecord<T extends BaseApiRecord>(options: FetchDataOp
     custid,
     status,
     fetchData,
+    updateRecord,
   };
 }
