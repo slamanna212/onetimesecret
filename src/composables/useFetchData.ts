@@ -25,7 +25,7 @@ export function useFetchData<T extends BaseApiRecord>({ url, onSuccess, onError 
   const details = ref<DetailsType>(null);
   const isLoading = ref(false);
   const error = ref('');
-  const success = ref(false);
+  const success = ref('');
   const count = ref<number>(0);
   const custid = ref<string | null>(null);
   const status = ref<number | null>(null);
@@ -33,7 +33,7 @@ export function useFetchData<T extends BaseApiRecord>({ url, onSuccess, onError 
   const fetchData = async () => {
     isLoading.value = true;
     error.value = '';
-    success.value = false;
+    success.value = '';
     status.value = null;
 
     try {
@@ -67,7 +67,7 @@ export function useFetchData<T extends BaseApiRecord>({ url, onSuccess, onError 
         throw new Error('Unexpected response format');
       }
 
-      success.value = true;
+      success.value = 'Success';
 
       if (onSuccess) {
         onSuccess(records.value, details.value);
