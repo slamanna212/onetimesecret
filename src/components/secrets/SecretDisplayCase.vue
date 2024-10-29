@@ -71,20 +71,11 @@
     </div>
   </div>
 
-  <div class="text-center pt-20 text-xs text-gray-400 dark:text-gray-600">
-    <a :href="`https://${siteHost}`"
-       class="hover:underline"
-       rel="noopener noreferrer">
-      Powered by Onetime Secret
-    </a>
-  </div>
-
 </template>
 
 <script setup lang="ts">
 import { useClipboard } from '@/composables/useClipboard'
 import { SecretData, SecretDetails } from '@/types/onetime'
-import { useWindowProp } from '@/composables/useWindowProps';
 
 interface Props {
   secret: SecretData;
@@ -92,8 +83,6 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-
-const siteHost = useWindowProp('site_host');
 
 const { isCopied, copyToClipboard } = useClipboard()
 
