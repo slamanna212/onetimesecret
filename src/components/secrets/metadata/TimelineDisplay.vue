@@ -90,7 +90,8 @@
       </div>
 
       <!-- Expiration -->
-      <div class="group flex gap-4">
+      <div v-if="isAvailable"
+          class="group flex gap-4">
         <div class="
           flex-shrink-0 w-12 h-12
           flex items-center justify-center
@@ -104,7 +105,8 @@
             aria-hidden="true"
           />
         </div>
-        <div class="flex-grow group-hover:translate-x-1 transition-transform duration-200">
+        <div
+          class="flex-grow group-hover:translate-x-1 transition-transform duration-200">
           <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
             {{ $t('web.COMMON.expires') }}
           </p>
@@ -130,6 +132,10 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const isAvailable = computed(() => {
+  return !(props.details?.is_destroyed || props.details?.is_burned || props.details?.is_received);
+});
 
 // Calculate time ago for events
 const calculateTimeAgo = (dateStr: string) => {

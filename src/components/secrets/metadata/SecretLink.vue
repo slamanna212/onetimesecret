@@ -24,22 +24,23 @@
             <span>{{ $t('web.private.secret_created') }}</span>
           </div>
           <div class="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400">
-            <Icon icon="mdi:shield-lock-outline"
+            <Icon icon="material-symbols:timer-outline"
                   class="w-4 h-4"
                   aria-hidden="true" />
-            <span>{{ $t('web.COMMON.encrypted') }}</span>
+            <span>{{ $t('web.secrets.expiresIn', { duration: metadata.expiration_stamp }) }}</span>
           </div>
         </div>
 
         <textarea ref="linkInput"
                   readonly
                   :value="metadata.share_url"
+                  :class="details.show_secret_link ? 'inline' : 'blur-sm'"
                   class="
             w-full
             bg-transparent border-0
             text-gray-900 font-mono text-sm sm:text-base
             dark:text-gray-100
-            focus:ring-0
+            focus:ring-0 hover:ring-0 hover:blur-0
             resize-none
           "
                   aria-label="Secret link" />
@@ -91,10 +92,10 @@
                     class="w-3.5 h-3.5 text-amber-500" />
               {{ $t('web.COMMON.passphrase_protected') }}
             </li>
-            <li v-if="details.has_maxviews" class="flex items-center gap-1">
-              <Icon icon="mdi:eye-check"
-                    class="w-3.5 h-3.5 text-blue-500" />
-              {{ $t('web.COMMON.limited_views', { count: details.maxviews }) }}
+            <li v-if="metadata.share_domain" class="flex items-center gap-1">
+              <Icon icon="mdi:earth"
+                    class="w-3.5 h-3.5 text-brand-500" />
+              {{ $t('web.COMMON.custom_domain_protected') }}
             </li>
           </ul>
         </div>

@@ -22,7 +22,7 @@
     <div v-else-if="record && details"
          class="space-y-8">
       <!-- Secret Link Header -->
-      <header v-if="details.show_secret_link"
+      <header
               class="animate-fade-in relative"
               aria-labelledby="secret-header">
         <h1 id="secret-header"
@@ -44,37 +44,13 @@
                     class="focus-within:ring-2 focus-within:ring-brand-500 rounded-lg" />
       </header>
 
-      <!-- Expiration Countdown -->
-      <section class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
-        aria-labelledby="section-expiration">
-        <div v-if="!details.is_destroyed && !details.is_burned"
-             class="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              {{ t('web.COMMON.time_remaining') }}
-            </span>
-            <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
-              {{ timeRemaining }}
-            </span>
-          </div>
-          <div class="mt-2 w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-            <div class="bg-brand-500 h-2 rounded-full"
-                 :style="{ width: `${expirationProgress}%` }"
-                 role="progressbar"
-                 :aria-valuenow="expirationProgress"
-                 aria-valuemin="0"
-                 aria-valuemax="100" />
-          </div>
-        </div>
-      </section>
-
       <!-- Status & Timeline -->
-      <section class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
+      <section v-if="!details.show_secret_link" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
                aria-labelledby="section-status">
         <div class="flex items-center justify-between mb-2">
           <h2 id="section-status"
               class="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {{ t('web.COMMON.timeline_title') }}
+            {{ t('web.COMMON.secret_status') }}
           </h2>
           <StatusBadge :status="secretStatus" />
         </div>
@@ -83,39 +59,9 @@
                          :details="details" />
       </section>
 
-      <!-- Sharing Instructions -->
-      <section class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3"
-               aria-labelledby="section-sharing">
-        <h2 id="section-sharing"
-            class="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {{ t('web.COMMON.sharing_instructions') }}
-        </h2>
-
-        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          <li class="flex items-start gap-2">
-            <Icon icon="mdi:link"
-                  class="w-5 h-5 mt-0.5 text-brand-500"
-                  aria-hidden="true" />
-            {{ t('web.COMMON.share_link_instruction') }}
-          </li>
-          <li v-if="details.has_passphrase"
-              class="flex items-start gap-2">
-            <Icon icon="mdi:key"
-                  class="w-5 h-5 mt-0.5 text-amber-500"
-                  aria-hidden="true" />
-            {{ t('web.COMMON.share_passphrase_instruction') }}
-          </li>
-          <li class="flex items-start gap-2">
-            <Icon icon="mdi:shield-alert"
-                  class="w-5 h-5 mt-0.5 text-red-500"
-                  aria-hidden="true" />
-            {{ t('web.COMMON.secure_channel_instruction') }}
-          </li>
-        </ul>
-      </section>
-
       <!-- Actions -->
-      <section class="flex flex-col gap-3"
+      <section v-if="!details.show_secret_link"
+               class="flex flex-col gap-3"
                aria-labelledby="section-actions">
         <h2 id="section-actions"
             class="sr-only">
@@ -164,13 +110,13 @@ import { computed, onMounted, ref, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Icon } from '@iconify/vue';
-
+import StatusBadge from '@/components/secrets/metadata/StatusBadge.vue';
 import StatusBar from '@/components/StatusBar.vue';
+import TimelineDisplay from '@/components/secrets/metadata/TimelineDisplay.vue';
+
 import BurnButtonForm from '@/components/secrets/metadata/BurnButtonForm.vue';
 import MetadataFAQ from '@/components/secrets/metadata/MetadataFAQ.vue';
 import SecretLink from '@/components/secrets/metadata/SecretLink.vue';
-import StatusBadge from '@/components/secrets/metadata/StatusBadge.vue';
-import TimelineDisplay from '@/components/secrets/metadata/TimelineDisplay.vue';
 import { useFetchDataRecord } from '@/composables/useFetchData';
 import type { MetadataData } from '@/types/onetime';
 
