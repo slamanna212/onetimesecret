@@ -1,11 +1,11 @@
 <template>
-  <StatusBar :success="success"
-             :error="error"
-             :loading="isLoading"
-             :auto-dismiss="true" />
   <main class="max-w-2xl mx-auto px-4 py-6"
         role="main"
         :aria-busy="isLoading">
+    <StatusBar :success="success"
+               :error="error"
+               :loading="isLoading"
+               :auto-dismiss="true" />
 
     <!-- Loading State -->
     <div v-if="isLoading"
@@ -40,8 +40,8 @@
         </div>
 
         <SecretLink :metadata="record"
-                   :details="details"
-                   class="focus-within:ring-2 focus-within:ring-brand-500 rounded-lg" />
+                    :details="details"
+                    class="focus-within:ring-2 focus-within:ring-brand-500 rounded-lg" />
       </header>
 
       <!-- Security Details Section -->
@@ -115,7 +115,7 @@
         </div>
 
         <TimelineDisplay :metadata="record"
-                        :details="details" />
+                         :details="details" />
 
         <!-- Expiration Countdown -->
         <div v-if="!details.is_destroyed && !details.is_burned"
@@ -179,9 +179,9 @@
         </h2>
 
         <BurnButtonForm v-if="!details.is_destroyed"
-                       :metadata="record"
-                       :details="details"
-                       class="w-full" />
+                        :metadata="record"
+                        :details="details"
+                        class="w-full" />
 
         <button type="button"
                 @click="handleCreateNew"

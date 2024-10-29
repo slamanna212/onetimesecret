@@ -93,7 +93,9 @@
         </div>
       </form>
 
-      <StatusBar :success="success" :error="error" class="mt-4" />
+      <div class="mt-4" >
+        <StatusBar :success="success" :error="error" />
+      </div>
     </div>
 
     <!-- Security Notice -->

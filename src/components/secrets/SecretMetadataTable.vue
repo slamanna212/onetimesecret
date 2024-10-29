@@ -64,6 +64,7 @@ interface Props {
   notReceived?: Metadata[];
   received?: Metadata[];
   isLoading: boolean;
+  title: string;
 }
 
 defineProps<Props>();
