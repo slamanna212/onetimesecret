@@ -27,13 +27,6 @@
               target="_blank"
               rel="noopener noreferrer">API</a>
           </li>
-          <li>
-            <a href="https://status.onetimesecret.com/"
-              class="text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors duration-300 text-xl md:text-lg"
-              aria-label="Check our service status"
-              target="_blank"
-              rel="noopener noreferrer">Status</a>
-          </li>
         </ul>
       </div>
 
