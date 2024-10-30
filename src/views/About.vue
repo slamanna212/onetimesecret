@@ -45,7 +45,7 @@ onMounted(() => {
 
     <p class="">
       Modified version of <a href="https://github.com/onetimesecret/onetimesecret" title="OneTimeSecret">OneTimeSecret</a>
-    </br></br>
+      
       Hosted and run by <a href="https://slamanna.com" title"Sam">Sam</a>
     </p>
 
