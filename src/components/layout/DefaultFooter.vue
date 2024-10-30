@@ -15,13 +15,7 @@
         mt-6
         space-y-6 space-y-reverse md:space-y-0
         md:flex-row">
-        <div v-if="displayVersion"
-             class="
-          w-full md:w-auto
-          text-sm text-center md:text-left
-          text-gray-500 dark:text-gray-400">
-          &copy; {{ new Date().getFullYear() }} {{ companyName }}.
-        </div>
+
 
         <div v-if="displayToggles"
              class="
