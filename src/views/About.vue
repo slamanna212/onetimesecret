@@ -48,7 +48,7 @@ onMounted(() => {
     </p>
 
     <p class="">
-      Hosted and run by <a href="https://slamanna.com" title"Sam">Sam</a>
+      Hosted and run by <a href="https://slamanna.com" title="Sam">Sam</a>
     </p>
   </article>
 </template>
